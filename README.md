@@ -3,25 +3,31 @@
 This is the home of the assignments for [CS146S: The Modern Software Developer](https://themodernsoftware.dev), taught at Stanford University fall 2025.
 
 ## Repo Setup
+
 These steps work with Python 3.12.
 
-1. Install Anaconda
-   - Download and install: [Anaconda Individual Edition](https://www.anaconda.com/download)
-   - Open a new terminal so `conda` is on your `PATH`.
+1. Install uv (if not already installed)
 
-2. Create and activate a Conda environment (Python 3.12)
    ```bash
-   conda create -n cs146s python=3.12 -y
-   conda activate cs146s
+   curl -LsSf https://astral.sh/uv/install.sh | sh
    ```
 
-3. Install Poetry
+2. Create and activate a virtual environment with uv
+
    ```bash
-   curl -sSL https://install.python-poetry.org | python -
+   uv venv --python 3.12
+   source .venv/bin/activate
    ```
 
-4. Install project dependencies with Poetry (inside the activated Conda env)
+3. Install project dependencies with uv
    From the repository root:
+
    ```bash
-   poetry install --no-interaction
+   uv sync
+   ```
+
+   To install dev dependencies:
+
+   ```bash
+   uv sync --all-extras
    ```
