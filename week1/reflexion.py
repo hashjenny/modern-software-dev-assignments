@@ -1,6 +1,7 @@
 import os
 import re
 from typing import Callable, List, Tuple
+
 from dotenv import load_dotenv
 from ollama import chat
 
@@ -15,16 +16,18 @@ Keep the implementation minimal.
 """
 
 # TODO: Fill this in!
-YOUR_REFLEXION_PROMPT = ""
+YOUR_REFLEXION_PROMPT = """
+以代码测试的思维来优化代码,我会给出上一轮的代码以及无法通过的测试用例,然后优化代码,以便通过测试用例
+"""
 
 
 # Ground-truth test suite used to evaluate generated code
 SPECIALS = set("!@#$%^&*()-_")
 TEST_CASES: List[Tuple[str, bool]] = [
-    ("Password1!", True),       # valid
-    ("password1!", False),      # missing uppercase
-    ("Password!", False),       # missing digit
-    ("Password1", False),       # missing special
+    ("Password1!", True),  # valid
+    ("password1!", False),  # missing uppercase
+    ("Password!", False),  # missing digit
+    ("Password1", False),  # missing special
 ]
 
 
@@ -39,6 +42,12 @@ def extract_code_block(text: str) -> str:
 
 
 def load_function_from_code(code_str: str) -> Callable[[str], bool]:
+    """将模型生成的 Python 代码执行并取出 is_valid_password 函数。
+
+    - 使用 exec 在独立命名空间中执行代码
+    - 从命名空间中获取名为 is_valid_password 的可调用对象
+    - 若未找到或不可调用则抛出异常
+    """
     namespace: dict = {}
     exec(code_str, namespace)  # noqa: S102 (executing controlled code from model for exercise)
     func = namespace.get("is_valid_password")
@@ -48,6 +57,11 @@ def load_function_from_code(code_str: str) -> Callable[[str], bool]:
 
 
 def evaluate_function(func: Callable[[str], bool]) -> Tuple[bool, List[str]]:
+    """用预定义测试集评估密码函数，返回(是否全通过, 失败详情列表)。
+
+    评估规则来自 TEST_CASES 的期望值。
+    如果某用例失败，会基于“真值规则”给出诊断信息（如缺大写、缺数字等）。
+    """
     failures: List[str] = []
     for pw, expected in TEST_CASES:
         try:
@@ -96,7 +110,12 @@ def your_build_reflexion_context(prev_code: str, failures: List[str]) -> str:
 
     Return a string that will be sent as the user content alongside the reflexion system prompt.
     """
-    return ""
+    return f"""
+上一轮代码: 
+{prev_code}
+失败的测试用例: 
+{" ".join(failures)}
+"""
 
 
 def apply_reflexion(

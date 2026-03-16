@@ -9,7 +9,10 @@ load_dotenv()
 NUM_RUNS_TIMES = 5
 
 # TODO: Fill this in! Try to get as close to 100% correctness across all runs as possible.
-YOUR_SYSTEM_PROMPT = ""
+YOUR_SYSTEM_PROMPT = """
+Please use a mathematically logical approach to solve the problem.
+For example, the total length of the rope is 50 cm, with two knots on it—one knot at the beginning at 10 cm, and one knot at the end at 10 cm. The distance between the knots is 50 - 10 (knot at the beginning) - 10 (knot at the end) = 30 cm.
+"""
 
 USER_PROMPT = """
 Solve this problem, then give the final answer on the last line as "Answer: <number>".
@@ -82,5 +85,3 @@ def test_your_prompt(system_prompt: str) -> bool:
 
 if __name__ == "__main__":
     test_your_prompt(YOUR_SYSTEM_PROMPT)
-
-

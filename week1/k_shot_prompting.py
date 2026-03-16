@@ -1,4 +1,5 @@
 import os
+
 from dotenv import load_dotenv
 from ollama import chat
 
@@ -7,7 +8,21 @@ load_dotenv()
 NUM_RUNS_TIMES = 5
 
 # TODO: Fill this in!
-YOUR_SYSTEM_PROMPT = ""
+YOUR_SYSTEM_PROMPT = """
+Given a sequence of English letters, reverse the sequence and output it. Output only the reversed letter sequence without any additional content, and do not change the case of the letters. Below is an example, where "input" represents the input and "output" represents the reversed output.
+
+input:order
+output:redro
+
+input:letters
+output:srettel
+
+input:following
+output:gniwollof
+
+input:httpstatus
+output:
+"""
 
 USER_PROMPT = """
 Reverse the order of letters in the following word. Only output the reversed word, no other text:
@@ -17,6 +32,7 @@ httpstatus
 
 
 EXPECTED_OUTPUT = "sutatsptth"
+
 
 def test_your_prompt(system_prompt: str) -> bool:
     """Run the prompt up to NUM_RUNS_TIMES and return True if any output matches EXPECTED_OUTPUT.
@@ -41,6 +57,7 @@ def test_your_prompt(system_prompt: str) -> bool:
             print(f"Expected output: {EXPECTED_OUTPUT}")
             print(f"Actual output: {output_text}")
     return False
+
 
 if __name__ == "__main__":
     test_your_prompt(YOUR_SYSTEM_PROMPT)
