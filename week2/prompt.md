@@ -55,16 +55,17 @@
 
 本项目是基于 LLM 的“行动项提取”功能的应用,使用 FastAPI + SQLite 的技术栈. 最近的4次git提交的代码都是cursor生成的, 你可以通过git提交记录,writeup.md, assignment.md查看前4次Exercise生成的改动,项目的原始代码可以参考https://github.com/mihail911/modern-software-dev-assignments 这个仓库的week2文件夹, 给这些ai生成的代码附上注释,并在相应代码中注释其功能与修改的内容
 然后,分析 writeup.md 文件, 由于注释后前面生成的代码所在行数会发生变化, 请更新该md文件关于前面生成的代码所在行数的描述, 并将这些生成的代码按md的规范填写到对应的Exercise 的 Generated Code Snippets
-最后, 将本次提示词和你修改的代码文件及相关行号, 写入并替换Exercise 5: Generate a README from the Codebase 里相应TODO 内容
+最后, 将本次提示词和你修改的代码文件及相关行号, 写入并替换Exercise 5: Generate a README from the Codebase 里相应 TODO 内容
 
-并生成一份结构良好的 README.md 文件。README 至少应包含：
-项目简介
-如何设置并运行项目
-API 端点和功能说明
-运行测试套件的说明
-然后, 分析 writeup.md 文件,
+---
 
-1. 由于重构后前面生成的代码所在行数会发生变化, 请更新该md文件关于前面生成的代码所在行数的描述.
-2. 按照md文件的规范,将这几次修改生成的代码,插入对应的Exercise章节中.
-3. 将本次提示词和你修改的代码文件及相关行号, 写入并替换Exercise 5: Generate a README from the Codebase 里相应TODO 内容
-4. 最后, 我的名字是hashjenny, 请把writeup.md 文件里面相应的TODO替换为我的名字,并计算"现有一个基于 LLM 的“行动项提取”功能的应用,使用 FastAPI + SQLite 的技术栈..."这个prompt到当前的时间间隔,把This assignment took me about **TODO** hours to do. 文本里面的TODO替换
+本项目使用了uv的环境，venv文件夹位于../.venv，uv环境里已经安装了pytest
+
+请仔细分析这个项目, 生成一份结构良好的 README.md 文件。README 至少应包含：
+
+1. 项目简介
+2. 如何设置并运行项目
+3. API 端点和功能说明
+4. 运行测试套件的说明
+
+然后, 分析 writeup.md 文件, 将本次提示词和你修改的代码文件及相关行号, 补充到Exercise 5: Generate a README from the Codebase 里对应的位置

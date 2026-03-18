@@ -11,11 +11,11 @@ Fill out all of the `TODO`s in this file.
 
 ## SUBMISSION DETAILS
 
-Name: **TODO** \
+Name: **hashjenny** \
 SUNet ID: **TODO** \
 Citations: **TODO**
 
-This assignment took me about **TODO** hours to do.
+This assignment took me about **4.5** hours to do.
 
 ## YOUR RESPONSES
 
