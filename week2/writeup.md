@@ -128,6 +128,26 @@ week2/frontend/index.html: L27-L110（为 Exercise 4 的按钮与前端交互逻
 week2/writeup.md: L46-L128（更新 Exercise 1-4 的代码行号，并完成 Exercise 5 的 Prompt 与 Generated Code Snippets）
 ```
 
+Prompt（本次补充）:
+
+```
+请仔细分析这个项目, 生成一份结构良好的 README.md 文件。README 至少应包含：
+
+1. 项目简介
+2. 如何设置并运行项目
+3. API 端点和功能说明
+4. 运行测试套件的说明
+
+然后, 分析 writeup.md 文件, 将本次提示词和你修改的代码文件及相关行号, 补充到Exercise 5: Generate a README from the Codebase 里对应的位置
+```
+
+Generated Code Snippets（本次补充）:
+
+```
+week2/README.md: L1-L99（新增 README：项目简介、环境与运行、API 说明、测试套件说明）
+week2/writeup.md: L131-L149（在 Exercise 5 追加本次 Prompt 与 Generated Code Snippets 记录）
+```
+
 ## SUBMISSION INSTRUCTIONS
 
 1. Hit a `Command (⌘) + F` (or `Ctrl + F`) to find any remaining `TODO`s in this file. If no results are found, congratulations – you've completed all required fields.
