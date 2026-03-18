@@ -14,6 +14,8 @@ def ensure_data_directory_exists() -> None:
 
 
 def _configure_connection(connection: sqlite3.Connection) -> sqlite3.Connection:
+    # AI-generated (Exercise 3): centralize SQLite connection behavior so every
+    # database access uses consistent row mapping and FK constraints.
     connection.row_factory = sqlite3.Row
     # Ensure foreign keys behave as expected in SQLite.
     connection.execute("PRAGMA foreign_keys = ON;")
@@ -21,6 +23,8 @@ def _configure_connection(connection: sqlite3.Connection) -> sqlite3.Connection:
 
 
 def get_connection() -> sqlite3.Connection:
+    # AI-generated (Exercise 3): add connection timeout and thread setting to
+    # stabilize API usage across request handlers.
     ensure_data_directory_exists()
     connection = sqlite3.connect(
         DB_PATH,

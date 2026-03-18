@@ -89,6 +89,9 @@ def _looks_imperative(sentence: str) -> bool:
     return first.lower() in imperative_starters
 
 
+# AI-generated (Exercise 1):
+# Post-processing helper for LLM output. It normalizes bullet/checkbox formatting,
+# drops empty values, and deduplicates results while preserving order.
 def _postprocess_items(items: list[Any]) -> List[str]:
     extracted: List[str] = []
     for item in items:
@@ -125,10 +128,15 @@ def _parse_json_array_of_strings(maybe_json: str) -> list[Any] | None:
 
 def extract_action_items_llm(text: str) -> List[str]:
     """
+    AI-generated (Exercise 1):
     Extract action items using a local Ollama model (structured output).
 
     Returns a deduplicated list of action-item strings. On model/output failure,
-    falls back to the heuristic `extract_action_items()` to preserve app behavior.
+    falls back to heuristic `extract_action_items()` for backward compatibility.
+    Modification summary:
+    - Adds Ollama chat call with JSON schema-constrained output.
+    - Parses/recover JSON from model output and post-processes extracted items.
+    - Preserves previous behavior on errors by falling back to heuristic extraction.
     """
     text = str(text or "").strip()
     if not text:

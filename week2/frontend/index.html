@@ -24,7 +24,9 @@
     <div class="row">
       <label class="row"><input id="save_note" type="checkbox" checked /> Save as note</label>
       <button id="extract">Extract</button>
+      <!-- AI-generated (Exercise 4): trigger backend LLM extraction endpoint. -->
       <button id="extract_llm">Extract LLM</button>
+      <!-- AI-generated (Exercise 4): fetch and display persisted notes list. -->
       <button id="list_notes">List Notes</button>
     </div>
 
@@ -36,6 +38,8 @@
       const itemsEl = $('#items');
       const notesEl = $('#notes');
 
+      // AI-generated (Exercise 4):
+      // Reusable client helper to call either heuristic or LLM extraction endpoint.
       async function extractWith(endpoint) {
         const text = $('#text').value;
         const save = $('#save_note').checked;
@@ -79,6 +83,7 @@
         await extractWith('/action-items/extract-llm');
       });
 
+      // AI-generated (Exercise 4): load notes from GET /notes and render them.
       $('#list_notes').addEventListener('click', async () => {
         notesEl.textContent = 'Loading notes...';
         try {
@@ -107,5 +112,4 @@
     </script>
   </body>
   </html>
-
 

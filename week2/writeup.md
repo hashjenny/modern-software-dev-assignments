@@ -46,7 +46,7 @@ Prompt:
 Generated Code Snippets:
 
 ```
-week2/app/services/extract.py: L92-L176（新增 `extract_action_items_llm()` 及其 JSON 解析/后处理/回退逻辑）
+week2/app/services/extract.py: L92-L184（新增 `extract_action_items_llm()` 及其 JSON 解析/后处理/回退逻辑，并补充 AI 生成代码注释）
 ```
 
 ### Exercise 2: Add Unit Tests
@@ -62,8 +62,7 @@ Prompt:
 Generated Code Snippets:
 
 ```
-week2/tests/test_extract.py: L1-L87（新增针对 `extract_action_items_llm()` 的单元测试：项目符号/关键字前缀/空输入/异常输出回退）
-week2/writeup.md: L52-L67（更新 Exercise 2 的 Prompt 与代码行号列表）
+week2/tests/test_extract.py: L23-L91（新增针对 `extract_action_items_llm()` 的单元测试：项目符号/关键字前缀/空输入/异常输出回退，并补充 AI 生成代码注释）
 ```
 
 ### Exercise 3: Refactor Existing Code for Clarity
@@ -79,11 +78,10 @@ Prompt:
 Generated/Modified Code Snippets:
 
 ```
-week2/app/main.py: L3-L20（使用 FastAPI lifespan 管理 `init_db()`，避免 import 时执行初始化）
-week2/app/db.py: L16-L30（集中连接配置：row_factory、`PRAGMA foreign_keys=ON`、timeout、`check_same_thread=False`）
-week2/app/routers/notes.py: L3-L57（引入 Pydantic 请求/响应模型，收紧 API 合约；补充数据库异常 -> 500 的一致错误处理）
-week2/app/routers/action_items.py: L3-L97（引入 Pydantic 请求/响应模型，收紧 API 合约；补充数据库异常 -> 500 的一致错误处理）
-week2/writeup.md: L69-L87（填写 Exercise 3；并核对 Exercise 1/2 引用行号：`extract.py` 仍为 L92-L176，`test_extract.py` 仍为 L1-L87）
+week2/app/main.py: L14-L23（使用 FastAPI lifespan 管理 `init_db()`，避免 import 时执行初始化，并补充 AI 生成代码注释）
+week2/app/db.py: L16-L34（集中连接配置：row_factory、`PRAGMA foreign_keys=ON`、timeout、`check_same_thread=False`，并补充 AI 生成代码注释）
+week2/app/routers/notes.py: L14-L62（引入 Pydantic 请求/响应模型，收紧 API 合约；补充数据库异常 -> 500 的一致错误处理，并补充 AI 生成代码注释）
+week2/app/routers/action_items.py: L15-L103（引入 Pydantic 请求/响应模型，收紧 API 合约；补充数据库异常 -> 500 的一致错误处理，并补充 AI 生成代码注释）
 ```
 
 ### Exercise 4: Use Agentic Mode to Automate a Small Task
@@ -102,10 +100,9 @@ Prompt:
 Generated Code Snippets:
 
 ```
-week2/app/routers/action_items.py: L56-L70（新增 `POST /action-items/extract-llm`，调用 `extract_action_items_llm()` 并写入数据库）
-week2/app/routers/notes.py: L24-L33（新增 `GET /notes`，列出所有笔记）
-week2/frontend/index.html: L24-L105（新增 “Extract LLM”/“List Notes” 按钮与前端调用逻辑；新增 notes 展示区）
-week2/writeup.md: L89-L109（填写 Exercise 4；并在最终版本中修正 writeup 内部行号引用）
+week2/app/routers/action_items.py: L59-L74（新增 `POST /action-items/extract-llm`，调用 `extract_action_items_llm()` 并写入数据库，并补充 AI 生成代码注释）
+week2/app/routers/notes.py: L26-L36（新增 `GET /notes`，列出所有笔记，并补充 AI 生成代码注释）
+week2/frontend/index.html: L27-L110（新增 “Extract LLM”/“List Notes” 按钮与前端调用逻辑；新增 notes 展示区，并补充 AI 生成代码注释）
 ```
 
 ### Exercise 5: Generate a README from the Codebase
@@ -113,13 +110,22 @@ week2/writeup.md: L89-L109（填写 Exercise 4；并在最终版本中修正 wri
 Prompt:
 
 ```
-TODO
+本项目是基于 LLM 的“行动项提取”功能的应用,使用 FastAPI + SQLite 的技术栈. 最近的5次git提交的代码都是cursor生成的, 你可以通过git提交记录,writeup.md, assignment.md查看前4次Exercise生成的改动,项目的原始代码可以参考https://github.com/mihail911/modern-software-dev-assignments 这个仓库的week2文件夹, 给这些ai生成的代码附上注释,并在相应代码中注释其功能与修改的内容
+然后,分析 writeup.md 文件, 由于注释后前面生成的代码所在行数会发生变化, 请更新该md文件关于前面生成的代码所在行数的描述, 并将这些生成的代码按md的规范填写到对应的Exercise 的 Generated Code Snippets
+最后, 将本次提示词和你修改的代码文件及相关行号, 写入并替换Exercise 5: Generate a README from the Codebase 里相应TODO 内容
 ```
 
 Generated Code Snippets:
 
 ```
-TODO: List all modified code files with the relevant line numbers.
+week2/app/services/extract.py: L92-L184（为 Exercise 1 的 LLM 提取实现补充注释，标明功能与改动点）
+week2/tests/test_extract.py: L23-L91（为 Exercise 2 的 LLM 单元测试补充注释，标明覆盖场景与目的）
+week2/app/db.py: L16-L34（为 Exercise 3 的数据库连接重构补充注释，标明配置意图）
+week2/app/main.py: L14-L23（为 Exercise 3 的 lifespan 初始化逻辑补充注释）
+week2/app/routers/notes.py: L14-L62（为 Exercise 3/4 的 notes 合约与列表端点补充注释）
+week2/app/routers/action_items.py: L15-L103（为 Exercise 3/4 的请求响应模型与 LLM 端点补充注释）
+week2/frontend/index.html: L27-L110（为 Exercise 4 的按钮与前端交互逻辑补充注释）
+week2/writeup.md: L46-L128（更新 Exercise 1-4 的代码行号，并完成 Exercise 5 的 Prompt 与 Generated Code Snippets）
 ```
 
 ## SUBMISSION INSTRUCTIONS

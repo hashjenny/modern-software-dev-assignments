@@ -21,6 +21,7 @@ def test_extract_bullets_and_checkboxes():
 
 
 def test_extract_action_items_llm_bullets(monkeypatch: pytest.MonkeyPatch):
+    # AI-generated (Exercise 2): verifies happy-path structured JSON output.
     def fake_chat(**kwargs):
         # Return JSON array as required by extract_action_items_llm()
         return {"message": {"content": '["Set up database", "Write tests"]'}}
@@ -37,6 +38,7 @@ def test_extract_action_items_llm_bullets(monkeypatch: pytest.MonkeyPatch):
 
 
 def test_extract_action_items_llm_keyword_prefixes(monkeypatch: pytest.MonkeyPatch):
+    # AI-generated (Exercise 2): validates cleanup of prefixes/bullets from model output.
     def fake_chat(**kwargs):
         # Include keyword prefixes and bullets in model output to ensure postprocess cleans them.
         return {
@@ -57,6 +59,7 @@ def test_extract_action_items_llm_keyword_prefixes(monkeypatch: pytest.MonkeyPat
 
 
 def test_extract_action_items_llm_empty_input(monkeypatch: pytest.MonkeyPatch):
+    # AI-generated (Exercise 2): ensures empty input short-circuits before calling the model.
     called = {"n": 0}
 
     def fake_chat(**kwargs):
@@ -71,6 +74,7 @@ def test_extract_action_items_llm_empty_input(monkeypatch: pytest.MonkeyPatch):
 
 
 def test_extract_action_items_llm_fallback_on_bad_json(monkeypatch: pytest.MonkeyPatch):
+    # AI-generated (Exercise 2): ensures malformed LLM output triggers heuristic fallback.
     def fake_chat(**kwargs):
         # Not JSON; should trigger fallback to heuristic extraction.
         return {"message": {"content": "Sure! Here are some actions:\n- Set up database\n- Write tests"}}

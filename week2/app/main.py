@@ -11,6 +11,9 @@ from fastapi.staticfiles import StaticFiles
 from .db import init_db
 from .routers import action_items, notes
 
+# AI-generated (Exercise 3):
+# Move DB initialization into FastAPI lifespan so startup is explicit and
+# initialization does not run during module import.
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
     init_db()
