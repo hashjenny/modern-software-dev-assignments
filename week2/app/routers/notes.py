@@ -21,6 +21,18 @@ class NoteOut(BaseModel):
     created_at: str
 
 
+@router.get("")
+def list_all_notes() -> List[NoteOut]:
+    try:
+        rows = db.list_notes()
+    except sqlite3.Error as e:
+        raise HTTPException(status_code=500, detail="database error") from e
+    return [
+        NoteOut(id=int(r["id"]), content=str(r["content"]), created_at=str(r["created_at"]))
+        for r in rows
+    ]
+
+
 @router.post("")
 def create_note(payload: NoteCreateRequest) -> NoteOut:
     content = payload.content.strip()

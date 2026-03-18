@@ -24,20 +24,24 @@
     <div class="row">
       <label class="row"><input id="save_note" type="checkbox" checked /> Save as note</label>
       <button id="extract">Extract</button>
+      <button id="extract_llm">Extract LLM</button>
+      <button id="list_notes">List Notes</button>
     </div>
 
     <div class="items" id="items"></div>
+    <div class="items" id="notes"></div>
 
     <script>
       const $ = (sel) => document.querySelector(sel);
       const itemsEl = $('#items');
-      const btn = $('#extract');
-      btn.addEventListener('click', async () => {
+      const notesEl = $('#notes');
+
+      async function extractWith(endpoint) {
         const text = $('#text').value;
         const save = $('#save_note').checked;
         itemsEl.textContent = 'Extracting...';
         try {
-          const res = await fetch('/action-items/extract', {
+          const res = await fetch(endpoint, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ text, save_note: save }),
@@ -64,6 +68,39 @@
         } catch (err) {
           console.error(err);
           itemsEl.textContent = 'Error extracting items';
+        }
+      }
+
+      $('#extract').addEventListener('click', async () => {
+        await extractWith('/action-items/extract');
+      });
+
+      $('#extract_llm').addEventListener('click', async () => {
+        await extractWith('/action-items/extract-llm');
+      });
+
+      $('#list_notes').addEventListener('click', async () => {
+        notesEl.textContent = 'Loading notes...';
+        try {
+          const res = await fetch('/notes', { method: 'GET' });
+          if (!res.ok) throw new Error('Request failed');
+          const notes = await res.json();
+          if (!notes || notes.length === 0) {
+            notesEl.innerHTML = '<p class="muted">No notes saved yet.</p>';
+            return;
+          }
+          notesEl.innerHTML = `
+            <h2 style="font-size: 1.125rem; margin: 1rem 0 0.5rem;">Notes</h2>
+            ${notes.map(n => `
+              <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 0.75rem; margin: 0.5rem 0;">
+                <div class="muted">#${n.id} • ${n.created_at}</div>
+                <pre style="white-space: pre-wrap; margin: 0.5rem 0 0; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, monospace;">${n.content}</pre>
+              </div>
+            `).join('')}
+          `;
+        } catch (err) {
+          console.error(err);
+          notesEl.textContent = 'Error loading notes';
         }
       });
 
