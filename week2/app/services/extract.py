@@ -87,3 +87,90 @@ def _looks_imperative(sentence: str) -> bool:
         "investigate",
     }
     return first.lower() in imperative_starters
+
+
+def _postprocess_items(items: list[Any]) -> List[str]:
+    extracted: List[str] = []
+    for item in items:
+        if item is None:
+            continue
+        s = str(item).strip()
+        if not s:
+            continue
+        s = BULLET_PREFIX_PATTERN.sub("", s).strip()
+        s = s.removeprefix("[ ]").strip()
+        s = s.removeprefix("[todo]").strip()
+        extracted.append(s)
+
+    seen: set[str] = set()
+    unique: List[str] = []
+    for item in extracted:
+        lowered = item.lower()
+        if lowered in seen:
+            continue
+        seen.add(lowered)
+        unique.append(item)
+    return unique
+
+
+def _parse_json_array_of_strings(maybe_json: str) -> list[Any] | None:
+    try:
+        parsed = json.loads(maybe_json)
+        if isinstance(parsed, list):
+            return parsed
+        return None
+    except json.JSONDecodeError:
+        return None
+
+
+def extract_action_items_llm(text: str) -> List[str]:
+    """
+    Extract action items using a local Ollama model (structured output).
+
+    Returns a deduplicated list of action-item strings. On model/output failure,
+    falls back to the heuristic `extract_action_items()` to preserve app behavior.
+    """
+    text = str(text or "").strip()
+    if not text:
+        return []
+
+    model = os.getenv("OLLAMA_MODEL", "llama3.2")
+    temperature = float(os.getenv("OLLAMA_TEMPERATURE", "0"))
+
+    schema: dict[str, Any] = {
+        "type": "array",
+        "items": {"type": "string"},
+    }
+
+    messages = [
+        {
+            "role": "system",
+            "content": (
+                "You extract action items from notes.\n"
+                "Return ONLY valid JSON that matches the provided schema.\n"
+                "Action items must be concise, imperative, and self-contained.\n"
+                "Do not include non-action narrative. Do not include numbering/bullets."
+            ),
+        },
+        {"role": "user", "content": text},
+    ]
+
+    try:
+        resp = chat(
+            model=model,
+            messages=messages,
+            format=schema,
+            options={"temperature": temperature},
+        )
+        content = (resp.get("message") or {}).get("content") or ""
+        parsed = _parse_json_array_of_strings(content.strip())
+        if parsed is None:
+            # Attempt to recover if the model wrapped JSON in extra text.
+            m = re.search(r"\[[\s\S]*\]", content)
+            if m:
+                parsed = _parse_json_array_of_strings(m.group(0))
+        if parsed is None:
+            return extract_action_items(text)
+        return _postprocess_items(parsed)
+    except Exception:
+        return extract_action_items(text)

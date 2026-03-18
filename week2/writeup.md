@@ -26,13 +26,27 @@ For each exercise, please include what prompts you used to generate the answer, 
 Prompt:
 
 ```
-TODO
+现有一个基于 LLM 的“行动项提取”功能的应用,使用 FastAPI + SQLite 的技术栈
+
+文件结构如下:
+
+- app 文件夹是项目的FastAPI后端实现
+- data 文件夹存储项目的sqlite数据库
+- frontend 文件夹是项目的前端页面
+- tests 文件夹是项目的单元测试文件夹
+- mcp_scratch 文件夹与本项目无关请忽略
+- coding_agent_from_scratch_lecture.py 文件与本项目无关请忽略
+
+要求:
+
+1. 分析 extract.py 中现有的 extract_action_items() 函数（当前使用预定义启发式规则）, 实现一个基于 LLM 的替代函数 extract_action_items_llm()，使用 Ollama 和大模型来执行行动项提取。
+2. 分析 writeup.md 文件, 将本次提示词和你修改的代码文件及相关行号, 写入并替换Exercise 1: Scaffold a New Feature 里相应TODO 内容
 ```
 
 Generated Code Snippets:
 
 ```
-TODO: List all modified code files with the relevant line numbers.
+week2/app/services/extract.py: L92-L176（新增 `extract_action_items_llm()` 及其 JSON 解析/后处理/回退逻辑）
 ```
 
 ### Exercise 2: Add Unit Tests
