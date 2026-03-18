@@ -1,34 +1,47 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List
+import sqlite3
+from typing import List
 
 from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel, Field
 
 from .. import db
 
 
 router = APIRouter(prefix="/notes", tags=["notes"])
 
+class NoteCreateRequest(BaseModel):
+    content: str = Field(..., min_length=1)
+
+
+class NoteOut(BaseModel):
+    id: int
+    content: str
+    created_at: str
+
 
 @router.post("")
-def create_note(payload: Dict[str, Any]) -> Dict[str, Any]:
-    content = str(payload.get("content", "")).strip()
-    if not content:
-        raise HTTPException(status_code=400, detail="content is required")
-    note_id = db.insert_note(content)
-    note = db.get_note(note_id)
-    return {
-        "id": note["id"],
-        "content": note["content"],
-        "created_at": note["created_at"],
-    }
+def create_note(payload: NoteCreateRequest) -> NoteOut:
+    content = payload.content.strip()
+    try:
+        note_id = db.insert_note(content)
+        note = db.get_note(note_id)
+    except sqlite3.Error as e:
+        raise HTTPException(status_code=500, detail="database error") from e
+    if note is None:
+        raise HTTPException(status_code=500, detail="note creation failed")
+    return NoteOut(id=int(note["id"]), content=str(note["content"]), created_at=str(note["created_at"]))
 
 
 @router.get("/{note_id}")
-def get_single_note(note_id: int) -> Dict[str, Any]:
-    row = db.get_note(note_id)
+def get_single_note(note_id: int) -> NoteOut:
+    try:
+        row = db.get_note(note_id)
+    except sqlite3.Error as e:
+        raise HTTPException(status_code=500, detail="database error") from e
     if row is None:
         raise HTTPException(status_code=404, detail="note not found")
-    return {"id": row["id"], "content": row["content"], "created_at": row["created_at"]}
+    return NoteOut(id=int(row["id"]), content=str(row["content"]), created_at=str(row["created_at"]))
 
 

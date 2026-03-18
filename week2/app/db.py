@@ -13,11 +13,21 @@ def ensure_data_directory_exists() -> None:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 
+def _configure_connection(connection: sqlite3.Connection) -> sqlite3.Connection:
+    connection.row_factory = sqlite3.Row
+    # Ensure foreign keys behave as expected in SQLite.
+    connection.execute("PRAGMA foreign_keys = ON;")
+    return connection
+
+
 def get_connection() -> sqlite3.Connection:
     ensure_data_directory_exists()
-    connection = sqlite3.connect(DB_PATH)
-    connection.row_factory = sqlite3.Row
-    return connection
+    connection = sqlite3.connect(
+        DB_PATH,
+        timeout=10,
+        check_same_thread=False,
+    )
+    return _configure_connection(connection)
 
 
 def init_db() -> None:
