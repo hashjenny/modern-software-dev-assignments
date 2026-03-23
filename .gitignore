@@ -1,4 +1,5 @@
 __pycache__/
+.pytest_cache/
 *.py[cod]
 *.class
 *.so
@@ -9,7 +10,6 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
 lib64/
 parts/
 sdist/
@@ -52,3 +52,7 @@ Thumbs.db
 
 # Vercel
 .vercel/*
+
+node_modules/
+.claude/
+.logs/
