@@ -53,6 +53,32 @@ cp .env.example .env
 WEATHER_HOST=https://api.qweather.com
 WEATHER_KEY=你的API密钥
 LOC=Beijing  # 可替换为其他城市（如 Shanghai, Chengdu）
+
+# MCP 服务器认证（可选，不配置则跳过认证）
+MCP_API_KEY=your_mcp_api_key
+```
+
+## 认证
+
+MCP 服务器支持 API 密钥认证：
+
+- **启用认证**：在 `.env` 中设置 `MCP_API_KEY`
+- **跳过认证**：不设置 `MCP_API_KEY`（适用于本地开发）
+
+### Claude Desktop 配置（含认证）
+
+```json
+{
+  "mcpServers": {
+    "weather": {
+      "command": "node",
+      "args": ["/完整路径/week3/build/index.js"],
+      "env": {
+        "MCP_API_KEY": "your_api_key_here"
+      }
+    }
+  }
+}
 ```
 
 ## 运行
@@ -217,6 +243,8 @@ AI 会先调用 `get_weather` 获取温度，再调用 `get_clothing_advice` 获
 |---------|-----------|------|
 | 环境变量缺失 | -32602 | 需要配置 WEATHER_HOST, LOC, WEATHER_KEY |
 | 参数无效 | -32602 | temperature 必须为数字 |
+| API 密钥缺失 | -32603 | 需要设置 MCP_API_KEY |
+| API 密钥无效 | -32603 | 提供的 API 密钥不正确 |
 | API 请求超时 | -32603 | 10秒超时，自动重试3次 |
 | API 速率限制 | -32000 | 429 状态码，等待后自动重试 |
 | API 请求失败 | -32603 | HTTP 错误或其他网络问题 |
