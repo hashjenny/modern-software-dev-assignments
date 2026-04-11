@@ -13,7 +13,11 @@
     "resolveJsonModule": true,
     "declaration": true,
     "declarationMap": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "paths": {
+      "@modelcontextprotocol/sdk/server/express": ["./node_modules/@modelcontextprotocol/sdk/dist/esm/server/express.d.ts"],
+      "@modelcontextprotocol/sdk/server/streamableHttp": ["./node_modules/@modelcontextprotocol/sdk/dist/esm/server/streamableHttp.d.ts"]
+    }
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "build"]

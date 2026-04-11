@@ -154,6 +154,27 @@ describe("getWeather API error handling", () => {
     expect(result.tempMin).toBe(18);
     expect(result.date).toBe("2026-03-31");
   });
+
+  it("请求头只应包含 X-QW-Api-Key（不透传 MCP 认证头）", async () => {
+    const { getWeather } = await import("./weather-api.js");
+
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () =>
+        Promise.resolve({
+          daily: [{ tempMax: "28", tempMin: "18", fxDate: "2026-03-31" }],
+          code: "200",
+        }),
+    });
+
+    await getWeather();
+
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+    const fetchOptions = vi.mocked(global.fetch).mock.calls[0][1] as RequestInit;
+    expect(fetchOptions?.headers).toEqual({
+      "X-QW-Api-Key": "test-key",
+    });
+  });
 });
 
 describe("getWeather rate limit handling", () => {

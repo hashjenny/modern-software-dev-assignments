@@ -6,13 +6,29 @@ import dotenv from "dotenv";
 
 dotenv.config({ path: ".env", quiet: true, debug: false });
 
-const HOST = process.env.WEATHER_HOST;
-const LOC = process.env.LOC;
-const KEY = process.env.WEATHER_KEY;
-
 const REQUEST_TIMEOUT_MS = 10000;
 const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 1000;
+
+interface WeatherConfig {
+  host: string;
+  location: string;
+  apiKey: string;
+}
+
+function getWeatherConfig(): WeatherConfig {
+  const host = process.env.WEATHER_HOST;
+  const location = process.env.LOC;
+  const apiKey = process.env.WEATHER_KEY;
+
+  if (!host || !location || !apiKey) {
+    throw new WeatherAPIError(
+      "Missing WEATHER_HOST, LOC or WEATHER_KEY in environment",
+    );
+  }
+
+  return { host, location, apiKey };
+}
 
 export class WeatherAPIError extends Error {
   constructor(
@@ -124,19 +140,15 @@ export interface WeatherResult {
  * Get today's weather forecast
  */
 export async function getWeather(): Promise<WeatherResult> {
-  if (!HOST || !LOC || !KEY) {
-    throw new WeatherAPIError(
-      "Missing WEATHER_HOST, LOC or WEATHER_KEY in environment",
-    );
-  }
+  const { host, location, apiKey } = getWeatherConfig();
 
-  const url = `${HOST}/v7/weather/3d?location=${LOC}`;
+  const url = `${host}/v7/weather/3d?location=${location}`;
 
   const response = await fetchWithRetry(url, {
     method: "GET",
     headers: {
-      "X-QW-Api-Key": KEY,
-      MCP_API_KEY: "111111",
+      // 按和风天气规范，仅发送上游 API key，不混入 MCP 认证信息。
+      "X-QW-Api-Key": apiKey,
     },
   });
 

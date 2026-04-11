@@ -22,12 +22,16 @@
 **和风天气 API**
 - 端点: `GET https://api.qweather.com/v7/weather/3d`
 - 文档: https://dev.qweather.com/docs/api/weather/weather-now/
+- 请求头: `X-QW-Api-Key: <WEATHER_KEY>`
+
+> 说明：`X-QW-Api-Key` 是和风天气上游接口专用密钥，不用于 MCP 客户端鉴权。
 
 ## 前提条件
 
 - Node.js 18+
 - pnpm 8+
 - 和风天气 API 密钥（免费注册：https://dev.qweather.com）
+- （验证客户端可选）本地 Ollama + `qwen3:4b`
 
 ## 安装
 
@@ -64,6 +68,9 @@ MCP 服务器支持 API 密钥认证：
 
 - **启用认证**：在 `.env` 中设置 `MCP_API_KEY`
 - **跳过认证**：不设置 `MCP_API_KEY`（适用于本地开发）
+- **客户端传递方式**：
+  - STDIO（Claude Desktop）场景：通过进程环境变量注入 `MCP_API_KEY`
+  - HTTP 场景：在请求头中传递 `x-api-key: <MCP_API_KEY>`
 
 ### Claude Desktop 配置（含认证）
 
@@ -89,10 +96,50 @@ MCP 服务器支持 API 密钥认证：
 pnpm run mcp
 ```
 
+### HTTP MCP 模式（本地调试）
+
+```bash
+pnpm run start:http
+```
+
+默认监听 `http://127.0.0.1:3000`，若配置了 `MCP_API_KEY`，需在请求头带上 `x-api-key`。
+
 ### CLI 模式（独立命令行工具）
 
 ```bash
 pnpm run cli
+```
+
+## 验证客户端（Ollama + MCP）
+
+项目提供了 `verify-client`，用于自动验证 MCP 调用链路（`get_weather` + `get_clothing_advice`），并使用 Ollama `qwen3:4b` 生成总结。
+
+### 1) 验证 STDIO 模式
+
+```bash
+pnpm run build
+pnpm run verify:stdio
+```
+
+### 2) 验证 HTTP 模式
+
+先开一个终端启动 HTTP MCP 服务：
+
+```bash
+pnpm run build
+pnpm run start:http
+```
+
+再开另一个终端执行验证：
+
+```bash
+pnpm run verify:http
+```
+
+可选参数示例：
+
+```bash
+node build/verify-client.js --transport http --http-url http://127.0.0.1:3000 --ollama-model qwen3:4b
 ```
 
 ## Claude Desktop 配置
@@ -243,8 +290,8 @@ AI 会先调用 `get_weather` 获取温度，再调用 `get_clothing_advice` 获
 |---------|-----------|------|
 | 环境变量缺失 | -32602 | 需要配置 WEATHER_HOST, LOC, WEATHER_KEY |
 | 参数无效 | -32602 | temperature 必须为数字 |
-| API 密钥缺失 | -32603 | 需要设置 MCP_API_KEY |
-| API 密钥无效 | -32603 | 提供的 API 密钥不正确 |
+| API 密钥缺失 | -32603 | 需要设置 MCP_API_KEY，并在 HTTP 请求头传递 x-api-key |
+| API 密钥无效 | -32603 | 提供的 x-api-key 不正确 |
 | API 请求超时 | -32603 | 10秒超时，自动重试3次 |
 | API 速率限制 | -32000 | 429 状态码，等待后自动重试 |
 | API 请求失败 | -32603 | HTTP 错误或其他网络问题 |

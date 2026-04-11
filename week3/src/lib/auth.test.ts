@@ -42,13 +42,13 @@ describe("validateApiKey", () => {
   it("提供正确密钥时应通过验证", async () => {
     process.env.MCP_API_KEY = "secret-key-123";
     const { validateApiKey } = await import("./auth.js");
-    expect(() => validateApiKey({ MCP_API_KEY: "secret-key-123" })).not.toThrow();
+    expect(() => validateApiKey({ "x-api-key": "secret-key-123" })).not.toThrow();
   });
 
   it("密钥不匹配时应抛出包含 Invalid API key 的错误", async () => {
     process.env.MCP_API_KEY = "secret-key-123";
     const { validateApiKey } = await import("./auth.js");
-    expect(() => validateApiKey({ MCP_API_KEY: "wrong-key" })).toThrow("Invalid API key");
+    expect(() => validateApiKey({ "x-api-key": "wrong-key" })).toThrow("Invalid API key");
   });
 
   it("缺少密钥时应抛出包含 Missing API key 的错误", async () => {
@@ -60,13 +60,25 @@ describe("validateApiKey", () => {
   it("密钥为数组格式时应正确处理", async () => {
     process.env.MCP_API_KEY = "secret-key-123";
     const { validateApiKey } = await import("./auth.js");
-    expect(() => validateApiKey({ MCP_API_KEY: ["secret-key-123"] })).not.toThrow();
+    expect(() => validateApiKey({ "x-api-key": ["secret-key-123"] })).not.toThrow();
   });
 
   it("密钥为数组但值错误时应抛出错误", async () => {
     process.env.MCP_API_KEY = "secret-key-123";
     const { validateApiKey } = await import("./auth.js");
-    expect(() => validateApiKey({ MCP_API_KEY: ["wrong-key"] })).toThrow("Invalid API key");
+    expect(() => validateApiKey({ "x-api-key": ["wrong-key"] })).toThrow("Invalid API key");
+  });
+
+  it("应兼容旧版 MCP_API_KEY 请求头", async () => {
+    process.env.MCP_API_KEY = "secret-key-123";
+    const { validateApiKey } = await import("./auth.js");
+    expect(() => validateApiKey({ MCP_API_KEY: "secret-key-123" })).not.toThrow();
+  });
+
+  it("应支持大小写不敏感的请求头读取", async () => {
+    process.env.MCP_API_KEY = "secret-key-123";
+    const { validateApiKey } = await import("./auth.js");
+    expect(() => validateApiKey({ "X-API-KEY": "secret-key-123" })).not.toThrow();
   });
 });
 

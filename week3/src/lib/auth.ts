@@ -13,14 +13,53 @@
  *   2. 未配置密钥：跳过认证（适用于本地开发）
  *
  * 安全说明：
- * - 密钥比较使用恒定时间比较（防止时序攻击）
+ * - 密钥比较使用 timingSafeEqual（防止时序攻击）
  * - 密钥通过环境变量注入，不硬编码在代码中
  */
 
+import { timingSafeEqual } from "node:crypto";
 import { McpError } from "@modelcontextprotocol/sdk/types.js";
 
-// 从环境变量读取API密钥
-const MCP_API_KEY = process.env.MCP_API_KEY;
+type HeaderMap = Record<string, string | string[] | undefined>;
+
+function getConfiguredApiKey(): string | undefined {
+  const key = process.env.MCP_API_KEY;
+  if (!key || key.trim() === "") {
+    return undefined;
+  }
+  return key;
+}
+
+function firstHeaderValue(value: string | string[] | undefined): string | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+  return Array.isArray(value) ? value[0] : value;
+}
+
+/**
+ * 兼容读取多个头名称：
+ * - x-api-key（推荐）
+ * - MCP_API_KEY（兼容旧实现）
+ */
+function getProvidedApiKey(headers: HeaderMap): string | undefined {
+  for (const [rawKey, rawValue] of Object.entries(headers)) {
+    const key = rawKey.toLowerCase();
+    if (key === "x-api-key" || key === "mcp_api_key") {
+      return firstHeaderValue(rawValue);
+    }
+  }
+  return undefined;
+}
+
+function isEqualApiKey(expected: string, provided: string): boolean {
+  const expectedBuffer = Buffer.from(expected, "utf8");
+  const providedBuffer = Buffer.from(provided, "utf8");
+  if (expectedBuffer.length !== providedBuffer.length) {
+    return false;
+  }
+  return timingSafeEqual(expectedBuffer, providedBuffer);
+}
 
 /**
  * 认证错误类
@@ -41,32 +80,25 @@ export class AuthError extends McpError {
  *
  * 验证逻辑：
  * 1. 若未配置MCP_API_KEY，跳过验证（开发模式）
- * 2. 检查请求头是否存在 x-api-key
+ * 2. 检查请求头是否存在 x-api-key（兼容旧版 MCP_API_KEY）
  * 3. 比较提供的密钥与配置的密钥
  *
  * 注意：生产环境建议使用恒定时间比较防止时序攻击
  */
 export function validateApiKey(
-  headers: Record<string, string | string[] | undefined>,
+  headers: HeaderMap,
 ): void {
-  // 未配置密钥时，跳过验证（本地开发模式）
-  if (!MCP_API_KEY) {
+  const configuredApiKey = getConfiguredApiKey();
+  if (!configuredApiKey) {
     return;
   }
 
-  // 获取请求头中的API密钥
-  const providedKey = headers["MCP_API_KEY"];
-
-  // 密钥必须存在
+  const providedKey = getProvidedApiKey(headers);
   if (!providedKey) {
-    throw new AuthError("Missing API key. Provide 'MCP_API_KEY' header.");
+    throw new AuthError("Missing API key. Provide 'x-api-key' header.");
   }
 
-  // 处理可能的数组格式（HTTP头可能重复）
-  const key = Array.isArray(providedKey) ? providedKey[0] : providedKey;
-
-  // 恒定时间比较（实际使用中建议引入crypto.timingSafeEqual）
-  if (key !== MCP_API_KEY) {
+  if (!isEqualApiKey(configuredApiKey, providedKey)) {
     throw new AuthError("Invalid API key.");
   }
 }
@@ -79,8 +111,9 @@ export function validateApiKey(
  *   - configured: 是否已配置密钥
  */
 export function getApiKeyStatus(): { required: boolean; configured: boolean } {
+  const configuredApiKey = getConfiguredApiKey();
   return {
     required: true,
-    configured: !!MCP_API_KEY,
+    configured: !!configuredApiKey,
   };
 }

@@ -1,18 +1,21 @@
 # Week 3 — Build a Custom MCP Server
 
 Design and implement a Model Context Protocol (MCP) server that wraps a real external API. You may:
+
 - Run it **locally** (STDIO transport) and integrate with an MCP client (like Claude Desktop).
 - Or run it **remotely** (HTTP transport) and call it from a model agent or client. This is harder but earns extra credit.
 
 Bonus points for adding authentication (API keys or OAuth2) aligned with the MCP Authorization spec.
 
 ## Learning goals
+
 - Understand core MCP capabilities: tools, resources, prompts.
 - Implement tool definitions with typed parameters and robust error handling.
 - Follow logging and transport best practices (no stdout for STDIO servers).
 - Optionally implement authorization flows for HTTP transports.
 
 ## Requirements
+
 1. Choose an external API and document which endpoints you’ll use. Examples: weather, GitHub issues, Notion pages, movie/TV databases, calendar, task managers, finance/crypto, travel, sports stats.
 2. Expose at least two MCP tools
 3. Implement basic resilience:
@@ -29,6 +32,7 @@ Bonus points for adding authentication (API keys or OAuth2) aligned with the MCP
    - OAuth2-style bearer tokens for HTTP transport, validating token audience and never passing tokens through to upstream APIs.
 
 ## Deliverables
+
 - Source code under `week3/` (suggested: `week3/server/` with a clear entrypoint like `main.py` or `app.py`).
 - `week3/README.md` with:
   - Prerequisites, environment setup, and run instructions (local and/or remote).
@@ -36,6 +40,7 @@ Bonus points for adding authentication (API keys or OAuth2) aligned with the MCP
   - Tool reference: names, parameters, example inputs/outputs, and expected behaviors.
 
 ## Evaluation rubric (90 pts total)
+
 - Functionality (35): Implements 2+ tools, correct API integration, meaningful outputs.
 - Reliability (20): Input validation, error handling, logging, rate-limit awareness.
 - Developer experience (20): Clear setup/docs, easy to run locally; sensible folder structure.
@@ -45,8 +50,9 @@ Bonus points for adding authentication (API keys or OAuth2) aligned with the MCP
   - +5 Auth implemented correctly (API key or OAuth2 with audience validation).
 
 ## Helpful references
-- MCP Server Quickstart: [modelcontextprotocol.io/quickstart/server](https://modelcontextprotocol.io/quickstart/server). 
+
+- MCP Server Quickstart: [modelcontextprotocol.io/quickstart/server](https://modelcontextprotocol.io/quickstart/server).
 *NOTE: You may not submit this exact example.*
 - MCP Authorization (HTTP): [modelcontextprotocol.io/specification/2025-06-18/basic/authorization](https://modelcontextprotocol.io/specification/2025-06-18/basic/authorization)
 - Remote MCP on Cloudflare (Agents): [developers.cloudflare.com/agents/guides/remote-mcp-server/](https://developers.cloudflare.com/agents/guides/remote-mcp-server/). Use the modelcontextprotocol inspector tool to debug your server locally before deploying.
-- https://vercel.com/docs/mcp/deploy-mcp-servers-to-vercel If you choose to do a remote MCP deployment, Vercel is a good option with a free tier. 
+- <https://vercel.com/docs/mcp/deploy-mcp-servers-to-vercel> If you choose to do a remote MCP deployment, Vercel is a good option with a free tier.

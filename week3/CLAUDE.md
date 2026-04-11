@@ -36,16 +36,19 @@ src/
 ## Architecture
 
 ### MCP Server (`src/index.ts`)
+
 - STDIO transport for MCP protocol communication
 - Request handlers: Initialize, ListTools, ListResources, ListPrompts, CallTool
 - Optional API key auth via `MCP_API_KEY` env var
 - 4 tools: `get_weather`, `get_clothing_advice`, `get_logs`, `clear_logs`
 
 ### Tools (`src/mcp/tools.ts`)
+
 - Each tool exports: `name`, `description`, `inputSchema`, `handler`
 - Error codes: `-32602` (invalid params), `-32603` (internal error), `-32000` (rate limited)
 
 ### Weather API (`src/lib/weather-api.ts`)
+
 - QWeather API at `https://api.qweather.com/v7/weather/3d`
 - `getWeather()`: Fetches today's forecast
 - `WeatherAPIError`, `NetworkTimeoutError`: Custom error classes
@@ -53,17 +56,19 @@ src/
 - Handles 429 rate limit with Retry-After header support
 
 ### Clothing Advice (`src/lib/clothing.ts`)
+
 - `getClothingAdvice(temperature)`: Returns clothing suggestion based on 26°C comfort baseline
 - Rules: diff ≥5 (hot), ≥2 (warm), ≥-2 (comfortable), ≥-5 (cool), ≥-8 (chilly), <-8 (cold)
 
 ### Logging (`src/lib/logger.ts`)
+
 - JSONL files in `.logs/weather-mcp-YYYY-MM-DD.jsonl`
 - Retains 7 days of logs, auto-cleanup on date change
 - Logs to stderr to avoid polluting stdout MCP traffic
 
 ## Environment Variables
 
-```
+```env
 WEATHER_HOST=https://api.qweather.com
 WEATHER_KEY=<qweather-api-key>
 LOC=Beijing

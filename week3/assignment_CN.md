@@ -28,7 +28,7 @@
    - 本地：STDIO 服务器，可在你的机器上运行并能被 Claude Desktop 或 AI IDE（如 Cursor）发现。
    - 远程：HTTP 服务器，可通过网络访问，被支持 MCP 的客户端或代理运行时调用。若部署并可访问可获额外加分。
 6. （可选）加分项：认证
-   - 通过环境变量和客户端配置支持 API key；或
+   - 通过环境变量和客户端配置支持 API key；
    - 对于 HTTP 传输，实现 OAuth2 风格的 bearer token，校验 token 的受众（audience），并且不要将接收到的 token 传递给上游 API。
 
 ## 交付物
@@ -55,4 +55,4 @@
   _注意：你不得直接提交该示例的完整复制实现。_
 - MCP 授权（HTTP）： [modelcontextprotocol.io/specification/2025-06-18/basic/authorization](https://modelcontextprotocol.io/specification/2025-06-18/basic/authorization)
 - 远程 MCP（Cloudflare Agents）： [developers.cloudflare.com/agents/guides/remote-mcp-server/](https://developers.cloudflare.com/agents/guides/remote-mcp-server/)。在部署前，可使用 modelcontextprotocol inspector 工具在本地调试你的服务器。
-- 如果选择远程部署，Vercel 提供了友好的免费层，参考： https://vercel.com/docs/mcp/deploy-mcp-servers-to-vercel
+- 如果选择远程部署，Vercel 提供了友好的免费层，参考： [vercel doc](https://vercel.com/docs/mcp/deploy-mcp-servers-to-vercel)
