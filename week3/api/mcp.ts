@@ -1,6 +1,11 @@
 /**
  * @file api/mcp.ts
  * @desc Vercel HTTP 入口：复用 src/transports/http-handler.ts
+ *
+ * 该文件保持“薄路由”设计：
+ * - 只处理 CORS / OPTIONS / 错误映射
+ * - 所有 MCP 协议细节与认证逻辑都在 src 层实现
+ * 这样可保证本地 HTTP 与 Vercel HTTP 行为一致，降低维护成本。
  */
 
 import { logger } from "../src/lib/logger.js";

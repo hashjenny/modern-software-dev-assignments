@@ -27,6 +27,9 @@ interface OllamaMessage {
   content: string;
 }
 
+/**
+ * 解析命令行参数，支持快速切换 transport 与模型配置。
+ */
 function parseArgs(argv: string[]): VerifyClientOptions {
   const options: VerifyClientOptions = {
     transport: "stdio",
@@ -64,6 +67,9 @@ function parseArgs(argv: string[]): VerifyClientOptions {
   return options;
 }
 
+/**
+ * 调用 Ollama chat API，生成一次“验证结论”文本。
+ */
 async function callOllama(
   url: string,
   model: string,
@@ -95,6 +101,11 @@ function extractToolText(result: unknown): string {
   return first?.text || "";
 }
 
+/**
+ * 根据 transport 创建 MCP 客户端连接。
+ * - stdio: 启动本地 MCP 进程
+ * - http: 连接远程/本地 HTTP MCP
+ */
 async function connectClient(options: VerifyClientOptions) {
   const client = new Client({
     name: "week3-verify-client",
@@ -118,6 +129,7 @@ async function connectClient(options: VerifyClientOptions) {
     headers["x-api-key"] = process.env.MCP_API_KEY;
   }
   if (process.env.OAUTH_BEARER_TOKEN) {
+    // Bearer token 仅发往 MCP 服务端用于认证，不会发送给天气上游 API。
     headers.Authorization = `Bearer ${process.env.OAUTH_BEARER_TOKEN}`;
   }
   const transport = new StreamableHTTPClientTransport(new URL(options.httpUrl), {
@@ -129,6 +141,12 @@ async function connectClient(options: VerifyClientOptions) {
   return client;
 }
 
+/**
+ * 执行完整验证流程：
+ * 1) listTools 检查能力发现
+ * 2) callTool 调用 weather + advice
+ * 3) 交给 Ollama 生成可读结论
+ */
 async function verifyMcpWithOllama(options: VerifyClientOptions): Promise<void> {
   const client = await connectClient(options);
 

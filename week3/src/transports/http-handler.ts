@@ -21,9 +21,13 @@ export function applyCorsHeaders(res: ServerResponse): void {
 
 /**
  * 处理 MCP HTTP 请求：
- * 1. 校验 MCP API Key（若启用）
+ * 1. 按配置执行认证（API Key 或 OAuth2 Bearer）
  * 2. 复用统一 MCP server 注册逻辑
  * 3. 将请求交给 Streamable HTTP transport
+ *
+ * 说明：
+ * - 这里不解析业务 token，也不把认证信息透传给上游天气 API。
+ * - 上游 API 调用仅发生在 weather-api 模块，且只使用 WEATHER_KEY。
  */
 export async function handleMcpHttpRequest(
   req: IncomingMessage,

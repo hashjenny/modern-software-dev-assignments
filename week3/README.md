@@ -5,14 +5,26 @@
 ## 功能
 
 提供 4 个 MCP 工具：
+
 - `get_weather`: 获取今日天气预报（最高温度、最低温度、日期）
 - `get_clothing_advice`: 根据温度获取穿衣建议
 - `get_logs`: 获取 MCP 服务器日志（支持过滤和分页）
 - `clear_logs`: 清除所有日志文件
 
+## 架构概览
+
+- `src/mcp/server.ts`：统一 MCP server 工厂（tools/resources/prompts 注册）
+- `src/index.ts`：STDIO 启动入口
+- `src/http-server.ts`：本地 HTTP 启动入口
+- `api/mcp.ts`：Vercel Serverless 入口（复用同一核心逻辑）
+- `src/lib/auth.ts`：API Key + OAuth2 Bearer 认证
+- `src/lib/weather-api.ts`：和风天气 API 访问（重试、超时、限流处理）
+- `src/verify-client.ts`：MCP 端到端验证客户端（stdio/http + Ollama）
+
 ## 日志持久化
 
 日志存储在 `.logs/` 目录下的 JSONL 文件中：
+
 - 文件命名格式: `weather-mcp-YYYY-MM-DD.jsonl`
 - 默认保留最近 7 天的日志
 - 每条日志包含：时间戳、级别、消息、工具名称、执行时长等
@@ -20,8 +32,9 @@
 ## 使用的外部 API
 
 **和风天气 API**
+
 - 端点: `GET https://api.qweather.com/v7/weather/3d`
-- 文档: https://dev.qweather.com/docs/api/weather/weather-now/
+- 文档: <https://dev.qweather.com/docs/api/weather/weather-now/>
 - 请求头: `X-QW-Api-Key: <WEATHER_KEY>`
 
 > 说明：`X-QW-Api-Key` 是和风天气上游接口专用密钥，不用于 MCP 客户端鉴权。
@@ -30,7 +43,7 @@
 
 - Node.js 18+
 - pnpm 8+
-- 和风天气 API 密钥（免费注册：https://dev.qweather.com）
+- 和风天气 API 密钥（免费注册：<https://dev.qweather.com）>
 - （验证客户端可选）本地 Ollama + `qwen3:4b`
 
 ## 安装
@@ -199,6 +212,22 @@ pnpm run verify:http
      - OAuth2: `OAUTH_JWT_SECRET`, `OAUTH_AUDIENCE`（可选 `OAUTH_ISSUER`）
 6. 部署完成后用 MCP inspector 或客户端访问 `https://<your-project>.vercel.app/api/mcp` 验证。
 
+## 常见问题（FAQ）
+
+1. `pnpm run start:http` 启动后无法调用？
+
+- 先确认 `.env` 中 `WEATHER_HOST/WEATHER_KEY/LOC` 已配置。
+- 若配了 `MCP_API_KEY`，HTTP 请求必须带 `x-api-key`。
+- 若配了 `OAUTH_JWT_SECRET + OAUTH_AUDIENCE`，必须带 `Authorization: Bearer <JWT>`。
+
+1. OAuth2 模式下 `x-api-key` 为什么不生效？
+
+- 当前设计是 OAuth2 优先。只要配置了 OAuth 环境变量，就会强制校验 Bearer token。
+
+1. 如何确认 token 没有被传给天气 API？
+
+- 查看 `src/lib/weather-api.ts` 与对应测试 `src/lib/weather-api.test.ts`：上游请求头仅包含 `X-QW-Api-Key`。
+
 ## Claude Desktop 配置
 
 在 Claude Desktop 的 MCP 服务器配置中添加：
@@ -215,6 +244,7 @@ pnpm run verify:http
 ```
 
 配置文件位置：
+
 - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
 - **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
 
@@ -225,36 +255,47 @@ pnpm run verify:http
 在 Claude Desktop 中与 AI 对话：
 
 **1. 查询天气：**
+
 ```
 今天的天气怎么样？
 ```
+
 或直接要求：
+
 ```
 调用 get_weather 工具查询今天的天气
 ```
 
 **2. 获取穿衣建议：**
+
 ```
 今天25度怎么穿衣？
 ```
+
 AI 会调用 `get_clothing_advice` 工具，传入 `temperature: 25`。
 
 **3. 组合使用：**
+
 ```
 查询天气并给出穿衣建议
 ```
+
 AI 会先调用 `get_weather` 获取温度，再调用 `get_clothing_advice` 获取建议。
 
 **4. 查看日志：**
+
 ```
 查看最近的工具调用日志
 ```
+
 或
+
 ```
 查看 get_weather 的错误日志
 ```
 
 **5. 清除日志：**
+
 ```
 清除所有日志
 ```
@@ -268,6 +309,7 @@ AI 会先调用 `get_weather` 获取温度，再调用 `get_clothing_advice` 获
 **参数**: 无
 
 **返回**:
+
 ```json
 {
   "tempMax": 28,
@@ -281,11 +323,13 @@ AI 会先调用 `get_weather` 获取温度，再调用 `get_clothing_advice` 获
 根据温度获取穿衣建议。
 
 **参数**:
+
 | 名称 | 类型 | 必填 | 描述 |
 |------|------|------|------|
 | temperature | number | 是 | 温度（摄氏度） |
 
 **返回**:
+
 ```json
 {
   "suggestion": "天气较热：建议短袖 + 短裤，注意防晒。",
@@ -300,8 +344,9 @@ AI 会先调用 `get_weather` 获取温度，再调用 `get_clothing_advice` 获
 获取 MCP 服务器日志记录。
 
 **参数**:
+
 | 名称 | 类型 | 必填 | 描述 |
-|------|------|------|------|
+| ------ | ------ | ------ | ------ |
 | limit | number | 否 | 返回条数（默认100，最大1000） |
 | level | string | 否 | 日志级别过滤（DEBUG/INFO/WARN/ERROR） |
 | tool | string | 否 | 按工具名称过滤 |
@@ -309,6 +354,7 @@ AI 会先调用 `get_weather` 获取温度，再调用 `get_clothing_advice` 获
 | end_date | string | 否 | 结束时间（ISO 8601） |
 
 **返回**:
+
 ```json
 {
   "logs": [
@@ -334,6 +380,7 @@ AI 会先调用 `get_weather` 获取温度，再调用 `get_clothing_advice` 获
 **参数**: 无
 
 **返回**:
+
 ```json
 {
   "success": true,
@@ -344,7 +391,7 @@ AI 会先调用 `get_weather` 获取温度，再调用 `get_clothing_advice` 获
 ## 错误处理
 
 | 错误类型 | MCP 错误码 | 说明 |
-|---------|-----------|------|
+| --------- | ----------- | ------ |
 | 环境变量缺失 | -32602 | 需要配置 WEATHER_HOST, LOC, WEATHER_KEY |
 | 参数无效 | -32602 | temperature 必须为数字 |
 | API 密钥缺失 | -32603 | 需要设置 MCP_API_KEY，并在 HTTP 请求头传递 x-api-key |
