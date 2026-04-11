@@ -6,17 +6,17 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const {
-  validateApiKeyMock,
+  validateRequestAuthMock,
   connectMock,
   handleRequestMock,
 } = vi.hoisted(() => ({
-  validateApiKeyMock: vi.fn(),
+  validateRequestAuthMock: vi.fn(),
   connectMock: vi.fn(),
   handleRequestMock: vi.fn(),
 }));
 
 vi.mock("../lib/auth.js", () => ({
-  validateApiKey: validateApiKeyMock,
+  validateRequestAuth: validateRequestAuthMock,
 }));
 
 vi.mock("../mcp/server.js", () => ({
@@ -47,7 +47,7 @@ describe("applyCorsHeaders", () => {
     );
     expect(setHeader).toHaveBeenCalledWith(
       "Access-Control-Allow-Headers",
-      "Content-Type, x-api-key",
+      "Content-Type, x-api-key, Authorization",
     );
   });
 });
@@ -63,7 +63,7 @@ describe("handleMcpHttpRequest", () => {
 
     await handleMcpHttpRequest(req, res);
 
-    expect(validateApiKeyMock).toHaveBeenCalledWith(req.headers);
+    expect(validateRequestAuthMock).toHaveBeenCalledWith(req.headers);
     expect(connectMock).toHaveBeenCalledTimes(1);
     expect(handleRequestMock).toHaveBeenCalledWith(req, res, undefined);
   });

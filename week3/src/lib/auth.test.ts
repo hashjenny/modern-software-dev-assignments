@@ -5,6 +5,7 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { AuthError } from "./auth.js";
+import { SignJWT } from "jose";
 
 describe("AuthError", () => {
   it("应该继承 Error 并设置正确的错误消息", () => {
@@ -115,5 +116,89 @@ describe("getApiKeyStatus", () => {
     const { getApiKeyStatus } = await import("./auth.js");
     const status = getApiKeyStatus();
     expect(status.configured).toBe(false);
+  });
+});
+
+describe("validateOAuthBearer", () => {
+  const originalEnv = process.env;
+
+  beforeEach(() => {
+    vi.resetModules();
+    process.env = { ...originalEnv };
+  });
+
+  afterEach(() => {
+    process.env = originalEnv;
+  });
+
+  async function createToken(payload: Record<string, unknown>, secret: string) {
+    return await new SignJWT(payload)
+      .setProtectedHeader({ alg: "HS256" })
+      .setIssuedAt()
+      .setExpirationTime("10m")
+      .sign(new TextEncoder().encode(secret));
+  }
+
+  it("未配置 OAuth 参数时应跳过验证", async () => {
+    delete process.env.OAUTH_JWT_SECRET;
+    delete process.env.OAUTH_AUDIENCE;
+    const { validateOAuthBearer } = await import("./auth.js");
+    await expect(validateOAuthBearer({})).resolves.toBeUndefined();
+  });
+
+  it("Bearer token audience 正确时应通过验证", async () => {
+    process.env.OAUTH_JWT_SECRET = "oauth-secret";
+    process.env.OAUTH_AUDIENCE = "weather-mcp";
+    const token = await createToken(
+      { sub: "user-1", aud: "weather-mcp" },
+      "oauth-secret",
+    );
+    const { validateOAuthBearer } = await import("./auth.js");
+    await expect(
+      validateOAuthBearer({ Authorization: `Bearer ${token}` }),
+    ).resolves.toBeUndefined();
+  });
+
+  it("缺少 Bearer token 时应抛出错误", async () => {
+    process.env.OAUTH_JWT_SECRET = "oauth-secret";
+    process.env.OAUTH_AUDIENCE = "weather-mcp";
+    const { validateOAuthBearer } = await import("./auth.js");
+    await expect(validateOAuthBearer({})).rejects.toThrow("Missing bearer token");
+  });
+
+  it("audience 不匹配时应抛出错误", async () => {
+    process.env.OAUTH_JWT_SECRET = "oauth-secret";
+    process.env.OAUTH_AUDIENCE = "weather-mcp";
+    const token = await createToken(
+      { sub: "user-1", aud: "another-aud" },
+      "oauth-secret",
+    );
+    const { validateOAuthBearer } = await import("./auth.js");
+    await expect(
+      validateOAuthBearer({ Authorization: `Bearer ${token}` }),
+    ).rejects.toThrow("Invalid bearer token");
+  });
+});
+
+describe("validateRequestAuth", () => {
+  const originalEnv = process.env;
+
+  beforeEach(() => {
+    vi.resetModules();
+    process.env = { ...originalEnv };
+  });
+
+  afterEach(() => {
+    process.env = originalEnv;
+  });
+
+  it("OAuth 配置存在时应优先要求 Bearer", async () => {
+    process.env.OAUTH_JWT_SECRET = "oauth-secret";
+    process.env.OAUTH_AUDIENCE = "weather-mcp";
+    process.env.MCP_API_KEY = "legacy-key";
+    const { validateRequestAuth } = await import("./auth.js");
+    await expect(
+      validateRequestAuth({ "x-api-key": "legacy-key" }),
+    ).rejects.toThrow("Missing bearer token");
   });
 });

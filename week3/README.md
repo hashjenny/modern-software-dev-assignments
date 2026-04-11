@@ -60,6 +60,11 @@ LOC=Beijing  # 可替换为其他城市（如 Shanghai, Chengdu）
 
 # MCP 服务器认证（可选，不配置则跳过认证）
 MCP_API_KEY=your_mcp_api_key
+
+# OAuth2 Bearer（可选，启用后 HTTP 请求需携带 Bearer JWT）
+OAUTH_JWT_SECRET=your_hs256_secret
+OAUTH_AUDIENCE=weather-mcp
+# OAUTH_ISSUER=https://your-auth-server.example.com
 ```
 
 ## 认证
@@ -71,6 +76,18 @@ MCP 服务器支持 API 密钥认证：
 - **客户端传递方式**：
   - STDIO（Claude Desktop）场景：通过进程环境变量注入 `MCP_API_KEY`
   - HTTP 场景：在请求头中传递 `x-api-key: <MCP_API_KEY>`
+
+### OAuth2 Bearer 认证（HTTP）
+
+若配置了 `OAUTH_JWT_SECRET` 和 `OAUTH_AUDIENCE`，HTTP 接口会要求：
+
+- 请求头：`Authorization: Bearer <JWT>`
+- JWT 必须：
+  - 使用 `HS256` 且由 `OAUTH_JWT_SECRET` 签名
+  - `aud` 与 `OAUTH_AUDIENCE` 一致
+  - 若配置了 `OAUTH_ISSUER`，`iss` 也必须匹配
+
+> 安全要求：服务端只做 token 校验，不会将 Bearer token 透传给上游天气 API。
 
 ### Claude Desktop 配置（含认证）
 
@@ -103,6 +120,7 @@ pnpm run start:http
 ```
 
 默认监听 `http://127.0.0.1:3000`，若配置了 `MCP_API_KEY`，需在请求头带上 `x-api-key`。
+若启用 OAuth2，还需附带 `Authorization: Bearer <JWT>`。
 
 ### CLI 模式（独立命令行工具）
 
@@ -141,6 +159,45 @@ pnpm run verify:http
 ```bash
 node build/verify-client.js --transport http --http-url http://127.0.0.1:3000 --ollama-model qwen3:4b
 ```
+
+若你启用了 OAuth2，可额外设置：
+
+```bash
+export OAUTH_BEARER_TOKEN="<你的JWT>"
+pnpm run verify:http
+```
+
+## 远程 HTTP MCP（Vercel 部署）
+
+本项目已内置 `api/mcp.ts` 作为 Vercel Serverless 路由。部署后 MCP 地址为：
+
+`https://<your-project>.vercel.app/api/mcp`
+
+### 需要部署的内容
+
+- `api/mcp.ts`（Vercel 入口）
+- `src/**`（MCP 核心实现）
+- `package.json` / `pnpm-lock.yaml` / `tsconfig.json` / `vercel.json`
+
+不要部署 `build/` 目录，Vercel 会在云端安装依赖并构建。
+
+### 部署步骤
+
+1. 推送 `week3` 代码到 GitHub 仓库。
+2. 在 Vercel `New Project` 导入该仓库。
+3. **Root Directory** 选择 `week3`。
+4. 构建设置：
+   - Install Command: `pnpm install`
+   - Build Command: `pnpm run build`
+   - Output Directory: 留空（Node Serverless）
+5. 在 Vercel 环境变量配置：
+   - `WEATHER_HOST`
+   - `WEATHER_KEY`
+   - `LOC`
+   - 认证二选一或同时配置：
+     - API Key: `MCP_API_KEY`
+     - OAuth2: `OAUTH_JWT_SECRET`, `OAUTH_AUDIENCE`（可选 `OAUTH_ISSUER`）
+6. 部署完成后用 MCP inspector 或客户端访问 `https://<your-project>.vercel.app/api/mcp` 验证。
 
 ## Claude Desktop 配置
 

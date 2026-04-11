@@ -5,7 +5,7 @@
 
 import { IncomingMessage, ServerResponse } from "node:http";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
-import { validateApiKey } from "../lib/auth.js";
+import { validateRequestAuth } from "../lib/auth.js";
 import { createMcpServer } from "../mcp/server.js";
 
 type HeaderMap = Record<string, string | string[] | undefined>;
@@ -16,7 +16,7 @@ type HeaderMap = Record<string, string | string[] | undefined>;
 export function applyCorsHeaders(res: ServerResponse): void {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, x-api-key");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, x-api-key, Authorization");
 }
 
 /**
@@ -30,7 +30,7 @@ export async function handleMcpHttpRequest(
   res: ServerResponse,
   parsedBody?: unknown,
 ): Promise<void> {
-  validateApiKey(req.headers as HeaderMap);
+  await validateRequestAuth(req.headers as HeaderMap);
 
   const transport = new StreamableHTTPServerTransport({
     sessionIdGenerator: undefined,

@@ -117,6 +117,9 @@ async function connectClient(options: VerifyClientOptions) {
   if (process.env.MCP_API_KEY) {
     headers["x-api-key"] = process.env.MCP_API_KEY;
   }
+  if (process.env.OAUTH_BEARER_TOKEN) {
+    headers.Authorization = `Bearer ${process.env.OAUTH_BEARER_TOKEN}`;
+  }
   const transport = new StreamableHTTPClientTransport(new URL(options.httpUrl), {
     requestInit: {
       headers,
