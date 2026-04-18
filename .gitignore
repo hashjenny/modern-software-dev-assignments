@@ -54,6 +54,7 @@ Thumbs.db
 .vercel/*
 
 node_modules/
-.claude/
 .logs/
 .ruff_cache
+
+note.md
