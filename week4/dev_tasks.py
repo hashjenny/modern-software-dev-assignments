@@ -1,5 +1,6 @@
 import os
 import subprocess
+import sys
 
 
 def _run(cmd: list[str]) -> None:
@@ -8,23 +9,27 @@ def _run(cmd: list[str]) -> None:
     subprocess.run(cmd, check=True, env=env)
 
 
+def _run_module(module: str, args: list[str]) -> None:
+    _run([sys.executable, "-m", module, *args])
+
+
 def run() -> None:
     host = os.environ.get("HOST", "127.0.0.1")
     port = os.environ.get("PORT", "8000")
-    _run(["uvicorn", "backend.app.main:app", "--reload", "--host", host, "--port", port])
+    _run_module("uvicorn", ["backend.app.main:app", "--reload", "--host", host, "--port", port])
 
 
 def test() -> None:
-    _run(["pytest", "-q", "backend/tests"])
+    _run_module("pytest", ["-q", "backend/tests"])
 
 
 def format_code() -> None:
-    _run(["black", "."])
-    _run(["ruff", "check", ".", "--fix"])
+    _run_module("black", ["."])
+    _run_module("ruff", ["check", ".", "--fix"])
 
 
 def lint() -> None:
-    _run(["ruff", "check", "."])
+    _run_module("ruff", ["check", "."])
 
 
 def seed() -> None:
