@@ -1,20 +1,22 @@
 [project]
-name = "modern-software-dev-assignments"
+name = "week4"
 version = "0.1.0"
-description = "Course assignments with FastAPI + SQLite starter and tooling"
-authors = [{name = "hashjenny", email = "huangxudong717@outlook.com"}]
-readme = "README.md"
-requires-python = ">=3.10,<4.0"
+description = "Week 4 assignment - Autonomous Coding Agent"
+requires-python = ">=3.10"
 dependencies = [
     "fastapi>=0.111.0",
     "uvicorn[standard]>=0.23.0",
     "sqlalchemy>=2.0.0",
     "pydantic>=2.0.0",
     "python-dotenv>=1.0.0",
-    "openai>=1.0.0",
-    "ollama>=0.5.3",
-    "fastmcp>=3.1.1",
 ]
+
+[project.scripts]
+run = "dev_tasks:run"
+test = "dev_tasks:test"
+format = "dev_tasks:format_code"
+lint = "dev_tasks:lint"
+seed = "dev_tasks:seed"
 
 [project.optional-dependencies]
 dev = [
@@ -42,15 +44,3 @@ line-length = 100
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
 ignore = ["E501", "B008"]
-
-[tool.uv.workspace]
-members = [
-    "week1",
-    "week2",
-    "week3",
-    "week4",
-    "week5",
-    "week6",
-    "week7",
-    "week8",
-]

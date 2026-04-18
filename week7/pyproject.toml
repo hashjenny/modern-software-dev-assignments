@@ -1,0 +1,33 @@
+[project]
+name = "week7"
+version = "0.1.0"
+description = "Week 7 assignment"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi>=0.111.0",
+    "uvicorn[standard]>=0.23.0",
+    "sqlalchemy>=2.0.0",
+    "pydantic>=2.0.0",
+    "python-dotenv>=1.0.0",
+]
+
+[project.scripts]
+run = "dev_tasks:run"
+test = "dev_tasks:test"
+format = "dev_tasks:format_code"
+lint = "dev_tasks:lint"
+seed = "dev_tasks:seed"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "black>=24.1.0",
+    "ruff>=0.4.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
