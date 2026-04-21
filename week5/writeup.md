@@ -1,5 +1,7 @@
 # Week 5 Write-up
+
 Tip: To preview this markdown file
+
 - On Mac, press `Command (⌘) + Shift + V`
 - On Windows/Linux, press `Ctrl + Shift + V`
 
@@ -15,8 +17,8 @@ Citations: **TODO**
 
 This assignment took me about **TODO** hours to do.
 
-
 ## YOUR RESPONSES
+
 ### Automation A: Warp Drive saved prompts, rules, MCP servers
 
 a. Design of each automation, including goals, inputs/outputs, steps
@@ -33,8 +35,6 @@ d. (if applicable) Multi‑agent notes: roles, coordination strategy, and concur
 
 e. How you used the automation (what pain point it resolves or accelerates)
 > TODO
-
-
 
 ### Automation B: Multi‑agent workflows in Warp
 
@@ -53,8 +53,8 @@ d. (if applicable) Multi‑agent notes: roles, coordination strategy, and concur
 e. How you used the automation (what pain point it resolves or accelerates)
 > TODO
 
-
 ### (Optional) Automation C: Any Additional Automations
+
 a. Design of each automation, including goals, inputs/outputs, steps
 > TODO
 
