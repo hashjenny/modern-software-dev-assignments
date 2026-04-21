@@ -1,6 +1,6 @@
 # API Documentation
 
-Generated from `openapi.json` - 2026-04-18
+Generated from `openapi.json` - 2026-04-21
 
 ## Endpoints
 
@@ -12,6 +12,9 @@ Generated from `openapi.json` - 2026-04-18
 | POST | `/notes/` | Create Note |
 | GET | `/notes/search/` | Search Notes |
 | GET | `/notes/{note_id}` | Get Note |
+| PUT | `/notes/{note_id}` | Update Note |
+| DELETE | `/notes/{note_id}` | Delete Note |
+| POST | `/notes/{note_id}/extract` | Extract action items from note |
 
 ### Action Items
 
@@ -32,14 +35,16 @@ Generated from `openapi.json` - 2026-04-18
 ## Schemas
 
 ### NoteCreate
+
 ```json
 {
-  "title": "string",
-  "content": "string"
+  "title": "string (min_length=1, max_length=200)",
+  "content": "string (min_length=1)"
 }
 ```
 
 ### NoteRead
+
 ```json
 {
   "id": "integer",
@@ -49,13 +54,15 @@ Generated from `openapi.json` - 2026-04-18
 ```
 
 ### ActionItemCreate
+
 ```json
 {
-  "description": "string"
+  "description": "string (min_length=1)"
 }
 ```
 
 ### ActionItemRead
+
 ```json
 {
   "id": "integer",
