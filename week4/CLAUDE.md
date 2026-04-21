@@ -65,13 +65,16 @@ backend/tests/
 ## Code Navigation & Entry Points
 
 ### Running the Application
+
 ```bash
 cd week4/
 make run      # Starts uvicorn on 127.0.0.1:8000 with auto-reload
 ```
+
 API docs available at `/docs` (Swagger UI).
 
 ### Key Locations
+
 | What | Where |
 |------|-------|
 | Routers | `backend/app/routers/` |
@@ -81,19 +84,23 @@ API docs available at `/docs` (Swagger UI).
 | Frontend | `frontend/` |
 
 ### Seeding Database
+
 ```bash
 make seed     # Applies data/seed.sql if DB is new
 ```
+
 On startup, `apply_seed_if_needed()` runs automatically if the DB is empty.
 
 ## Style & Safety Gates
 
 ### Tool Expectations
+
 - **Formatting**: Black (line-length 100)
 - **Linting**: Ruff (rules: E, F, I, UP, B; ignore E501, B008)
 - **Pre-commit hooks**: black, ruff --fix, end-of-file-fixer, trailing-whitespace
 
 ### Safe Commands
+
 ```bash
 make format   # Runs black + ruff --fix (safe, idempotent)
 make lint     # Runs ruff check (read-only)
@@ -102,17 +109,20 @@ make seed     # Seeds DB if needed (safe)
 ```
 
 ### Commands to Avoid
+
 - `git push --force` — never do this to main/master
 - `git reset --hard` — discards local changes, use only if absolutely necessary
 - `rm -rf` without verification — always confirm before destructive deletes
 
 ### Lint/Test Gates
+
 - All PRs/changes must pass `make lint` and `make test`
 - Run `make format` before committing to auto-fix style issues
 
 ## Workflow Snippets
 
 ### Adding a New Endpoint
+
 1. Write a **failing test** first (e.g., in `backend/tests/test_*.py`)
 2. Implement the endpoint in the router
 3. Run `uv run pytest -q` to verify
@@ -120,6 +130,7 @@ make seed     # Seeds DB if needed (safe)
 5. Commit with a clear message describing what was added
 
 ### Refactoring a Module
+
 1. Find all imports: `grep -rn "from.*module_name" backend/`
 2. Use `git mv` to rename the file
 3. Update all import statements
