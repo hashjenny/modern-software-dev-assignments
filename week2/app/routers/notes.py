@@ -1,15 +1,14 @@
 from __future__ import annotations
 
 import sqlite3
-from typing import List
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 from .. import db
 
-
 router = APIRouter(prefix="/notes", tags=["notes"])
+
 
 # AI-generated (Exercise 3): explicit request model to tighten API contract.
 class NoteCreateRequest(BaseModel):
@@ -24,7 +23,7 @@ class NoteOut(BaseModel):
 
 
 @router.get("")
-def list_all_notes() -> List[NoteOut]:
+def list_all_notes() -> list[NoteOut]:
     # AI-generated (Exercise 4): new endpoint to list all notes for frontend "List Notes" button.
     try:
         rows = db.list_notes()
@@ -47,7 +46,9 @@ def create_note(payload: NoteCreateRequest) -> NoteOut:
         raise HTTPException(status_code=500, detail="database error") from e
     if note is None:
         raise HTTPException(status_code=500, detail="note creation failed")
-    return NoteOut(id=int(note["id"]), content=str(note["content"]), created_at=str(note["created_at"]))
+    return NoteOut(
+        id=int(note["id"]), content=str(note["content"]), created_at=str(note["created_at"])
+    )
 
 
 @router.get("/{note_id}")
@@ -59,5 +60,6 @@ def get_single_note(note_id: int) -> NoteOut:
         raise HTTPException(status_code=500, detail="database error") from e
     if row is None:
         raise HTTPException(status_code=404, detail="note not found")
-    return NoteOut(id=int(row["id"]), content=str(row["content"]), created_at=str(row["created_at"]))
-
+    return NoteOut(
+        id=int(row["id"]), content=str(row["content"]), created_at=str(row["created_at"])
+    )

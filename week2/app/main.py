@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import AsyncIterator
 
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
@@ -10,6 +10,7 @@ from fastapi.staticfiles import StaticFiles
 
 from .db import init_db
 from .routers import action_items, notes
+
 
 # AI-generated (Exercise 3):
 # Move DB initialization into FastAPI lifespan so startup is explicit and

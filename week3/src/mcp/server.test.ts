@@ -24,4 +24,3 @@ describe("MCP server registry", () => {
     expect(server).toBeTruthy();
   });
 });
-

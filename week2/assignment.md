@@ -27,7 +27,7 @@ Here's how you can start running the current starter application:
 1. Activate your conda environment.
 
 ```
-conda activate cs146s 
+conda activate cs146s
 ```
 
 2. From the project root, run the server:

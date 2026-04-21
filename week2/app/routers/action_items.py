@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import sqlite3
-from typing import List, Optional
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
@@ -9,8 +8,8 @@ from pydantic import BaseModel, Field
 from .. import db
 from ..services.extract import extract_action_items, extract_action_items_llm
 
-
 router = APIRouter(prefix="/action-items", tags=["action-items"])
+
 
 # AI-generated (Exercise 3): explicit extract request schema.
 class ActionItemsExtractRequest(BaseModel):
@@ -25,8 +24,8 @@ class ActionItemOut(BaseModel):
 
 
 class ActionItemsExtractResponse(BaseModel):
-    note_id: Optional[int]
-    items: List[ActionItemOut]
+    note_id: int | None
+    items: list[ActionItemOut]
 
 
 class MarkDoneRequest(BaseModel):
@@ -42,7 +41,7 @@ class MarkDoneResponse(BaseModel):
 def extract(payload: ActionItemsExtractRequest) -> ActionItemsExtractResponse:
     # AI-generated (Exercise 3): normalize request handling + DB exceptions.
     text = payload.text.strip()
-    note_id: Optional[int] = None
+    note_id: int | None = None
     try:
         if payload.save_note:
             note_id = db.insert_note(text)
@@ -52,7 +51,7 @@ def extract(payload: ActionItemsExtractRequest) -> ActionItemsExtractResponse:
         raise HTTPException(status_code=500, detail="database error") from e
     return ActionItemsExtractResponse(
         note_id=note_id,
-        items=[ActionItemOut(id=i, text=t) for i, t in zip(ids, items)],
+        items=[ActionItemOut(id=i, text=t) for i, t in zip(ids, items, strict=False)],
     )
 
 
@@ -60,7 +59,7 @@ def extract(payload: ActionItemsExtractRequest) -> ActionItemsExtractResponse:
 def extract_llm(payload: ActionItemsExtractRequest) -> ActionItemsExtractResponse:
     # AI-generated (Exercise 4): LLM-backed extraction endpoint used by frontend "Extract LLM".
     text = payload.text.strip()
-    note_id: Optional[int] = None
+    note_id: int | None = None
     try:
         if payload.save_note:
             note_id = db.insert_note(text)
@@ -70,12 +69,12 @@ def extract_llm(payload: ActionItemsExtractRequest) -> ActionItemsExtractRespons
         raise HTTPException(status_code=500, detail="database error") from e
     return ActionItemsExtractResponse(
         note_id=note_id,
-        items=[ActionItemOut(id=i, text=t) for i, t in zip(ids, items)],
+        items=[ActionItemOut(id=i, text=t) for i, t in zip(ids, items, strict=False)],
     )
 
 
 @router.get("")
-def list_all(note_id: Optional[int] = None) -> List[dict]:
+def list_all(note_id: int | None = None) -> list[dict]:
     # AI-generated (Exercise 3): centralized DB-to-JSON conversion with error handling.
     try:
         rows = db.list_action_items(note_id=note_id)
@@ -101,4 +100,3 @@ def mark_done(action_item_id: int, payload: MarkDoneRequest) -> MarkDoneResponse
     except sqlite3.Error as e:
         raise HTTPException(status_code=500, detail="database error") from e
     return MarkDoneResponse(id=action_item_id, done=payload.done)
-

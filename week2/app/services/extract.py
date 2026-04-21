@@ -1,12 +1,12 @@
 from __future__ import annotations
 
+import json
 import os
 import re
-from typing import List
-import json
 from typing import Any
-from ollama import chat
+
 from dotenv import load_dotenv
+from ollama import chat
 
 load_dotenv()
 
@@ -31,9 +31,9 @@ def _is_action_line(line: str) -> bool:
     return False
 
 
-def extract_action_items(text: str) -> List[str]:
+def extract_action_items(text: str) -> list[str]:
     lines = text.splitlines()
-    extracted: List[str] = []
+    extracted: list[str] = []
     for raw_line in lines:
         line = raw_line.strip()
         if not line:
@@ -56,7 +56,7 @@ def extract_action_items(text: str) -> List[str]:
                 extracted.append(s)
     # Deduplicate while preserving order
     seen: set[str] = set()
-    unique: List[str] = []
+    unique: list[str] = []
     for item in extracted:
         lowered = item.lower()
         if lowered in seen:
@@ -92,8 +92,8 @@ def _looks_imperative(sentence: str) -> bool:
 # AI-generated (Exercise 1):
 # Post-processing helper for LLM output. It normalizes bullet/checkbox formatting,
 # drops empty values, and deduplicates results while preserving order.
-def _postprocess_items(items: list[Any]) -> List[str]:
-    extracted: List[str] = []
+def _postprocess_items(items: list[Any]) -> list[str]:
+    extracted: list[str] = []
     for item in items:
         if item is None:
             continue
@@ -106,7 +106,7 @@ def _postprocess_items(items: list[Any]) -> List[str]:
         extracted.append(s)
 
     seen: set[str] = set()
-    unique: List[str] = []
+    unique: list[str] = []
     for item in extracted:
         lowered = item.lower()
         if lowered in seen:
@@ -126,7 +126,7 @@ def _parse_json_array_of_strings(maybe_json: str) -> list[Any] | None:
         return None
 
 
-def extract_action_items_llm(text: str) -> List[str]:
+def extract_action_items_llm(text: str) -> list[str]:
     """
     AI-generated (Exercise 1):
     Extract action items using a local Ollama model (structured output).

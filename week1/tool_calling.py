@@ -1,7 +1,8 @@
 import ast
 import json
 import os
-from typing import Any, Callable, List, Tuple
+from collections.abc import Callable
+from typing import Any
 
 from dotenv import load_dotenv
 from ollama import chat
@@ -27,10 +28,10 @@ def _annotation_to_str(annotation: ast.AST | None) -> str:
 
 
 def _list_function_return_types(file_path: str) -> list[tuple[str, str]]:
-    with open(file_path, "r", encoding="utf-8") as f:
+    with open(file_path, encoding="utf-8") as f:
         source = f.read()
     tree = ast.parse(source)
-    results: List[Tuple[str, str]] = []
+    results: list[tuple[str, str]] = []
     for node in tree.body:
         if isinstance(node, ast.FunctionDef):
             return_str = _annotation_to_str(node.returns)
@@ -103,8 +104,8 @@ def extract_tool_call(text: str) -> dict[str, Any]:
     try:
         obj = json.loads(text)
         return obj
-    except json.JSONDecodeError:
-        raise ValueError("Model did not return valid JSON for the tool call")
+    except json.JSONDecodeError as exc:
+        raise ValueError("Model did not return valid JSON for the tool call") from exc
 
 
 def run_model_for_tool_call(system_prompt: str) -> dict[str, Any]:

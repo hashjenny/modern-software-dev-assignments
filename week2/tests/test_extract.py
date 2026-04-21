@@ -1,4 +1,3 @@
-import os
 import pytest
 
 from ..app.services import extract as extract_module
@@ -77,7 +76,9 @@ def test_extract_action_items_llm_fallback_on_bad_json(monkeypatch: pytest.Monke
     # AI-generated (Exercise 2): ensures malformed LLM output triggers heuristic fallback.
     def fake_chat(**kwargs):
         # Not JSON; should trigger fallback to heuristic extraction.
-        return {"message": {"content": "Sure! Here are some actions:\n- Set up database\n- Write tests"}}
+        return {
+            "message": {"content": "Sure! Here are some actions:\n- Set up database\n- Write tests"}
+        }
 
     monkeypatch.setattr(extract_module, "chat", fake_chat)
 

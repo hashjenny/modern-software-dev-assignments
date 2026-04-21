@@ -1,6 +1,6 @@
 import os
 import re
-from typing import Callable, List
+from collections.abc import Callable
 
 from dotenv import load_dotenv
 from ollama import chat
@@ -9,12 +9,12 @@ load_dotenv()
 
 NUM_RUNS_TIMES = 5
 
-DATA_FILES: List[str] = [
+DATA_FILES: list[str] = [
     os.path.join(os.path.dirname(__file__), "data", "api_docs.txt"),
 ]
 
 
-def load_corpus_from_files(paths: List[str]) -> List[str]:
+def load_corpus_from_files(paths: list[str]) -> list[str]:
     """
     从给定文件路径列表中加载语料文本。
     - 若文件存在且可读：读取全文并加入语料列表
@@ -22,11 +22,11 @@ def load_corpus_from_files(paths: List[str]) -> List[str]:
     - 若文件不存在：写入 missing_file 占位文本
     返回值为语料字符串列表（与输入路径一一对应）。
     """
-    corpus: List[str] = []
+    corpus: list[str] = []
     for p in paths:
         if os.path.exists(p):
             try:
-                with open(p, "r", encoding="utf-8") as f:
+                with open(p, encoding="utf-8") as f:
                     corpus.append(f.read())
             except Exception as exc:
                 corpus.append(f"[load_error] {p}: {exc}")
@@ -36,7 +36,7 @@ def load_corpus_from_files(paths: List[str]) -> List[str]:
 
 
 # Load corpus from external files (simple API docs). If missing, fall back to inline snippet
-CORPUS: List[str] = load_corpus_from_files(DATA_FILES)
+CORPUS: list[str] = load_corpus_from_files(DATA_FILES)
 
 QUESTION = (
     "Write a Python function `fetch_user_name(user_id: str, api_key: str) -> str` that calls the documented API "
@@ -61,7 +61,7 @@ REQUIRED_SNIPPETS = [
 ]
 
 
-def YOUR_CONTEXT_PROVIDER(corpus: List[str]) -> List[str]:
+def YOUR_CONTEXT_PROVIDER(corpus: list[str]) -> list[str]:
     """TODO: Select and return the relevant subset of documents from CORPUS for this task.
 
     For example, return [] to simulate missing context, or [corpus[0]] to include the API docs.
@@ -76,7 +76,7 @@ def YOUR_CONTEXT_PROVIDER(corpus: List[str]) -> List[str]:
     return [corpus[0]]
 
 
-def make_user_prompt(question: str, context_docs: List[str]) -> str:
+def make_user_prompt(question: str, context_docs: list[str]) -> str:
     """构建发送给模型的 user prompt。
 
     内容包含：
@@ -91,15 +91,15 @@ def make_user_prompt(question: str, context_docs: List[str]) -> str:
         context_block = "(no context provided)"
     return f"""Context (use ONLY this information):
         {context_block}
-        
+
         Task: {question}
-        
+
         Requirements:
         - Use the documented Base URL and endpoint.
         - Send the documented authentication header.
         - Raise for non-200 responses.
         - Return only the user's name string.
-        
+
         Output: A single fenced Python code block with the function and necessary imports.
         """
 
@@ -118,7 +118,7 @@ def extract_code_block(text: str) -> str:
 
 
 def test_your_prompt(
-    system_prompt: str, context_provider: Callable[[List[str]], List[str]]
+    system_prompt: str, context_provider: Callable[[list[str]], list[str]]
 ) -> bool:
     """Run up to NUM_RUNS_TIMES and return True if any output matches EXPECTED_OUTPUT."""
     context_docs = context_provider(CORPUS)

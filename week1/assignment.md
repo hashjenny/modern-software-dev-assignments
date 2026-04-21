@@ -13,7 +13,7 @@ We will be using a tool to run different state-of-the-art LLMs locally on your m
 - macOS (Homebrew):
 
   ```bash
-  brew install --cask ollama 
+  brew install --cask ollama
   ollama serve
   ```
 

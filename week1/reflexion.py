@@ -1,6 +1,5 @@
-import os
 import re
-from typing import Callable, List, Tuple
+from collections.abc import Callable
 
 from dotenv import load_dotenv
 from ollama import chat
@@ -23,7 +22,7 @@ YOUR_REFLEXION_PROMPT = """
 
 # Ground-truth test suite used to evaluate generated code
 SPECIALS = set("!@#$%^&*()-_")
-TEST_CASES: List[Tuple[str, bool]] = [
+TEST_CASES: list[tuple[str, bool]] = [
     ("Password1!", True),  # valid
     ("password1!", False),  # missing uppercase
     ("Password!", False),  # missing digit
@@ -56,13 +55,13 @@ def load_function_from_code(code_str: str) -> Callable[[str], bool]:
     return func
 
 
-def evaluate_function(func: Callable[[str], bool]) -> Tuple[bool, List[str]]:
+def evaluate_function(func: Callable[[str], bool]) -> tuple[bool, list[str]]:
     """用预定义测试集评估密码函数，返回(是否全通过, 失败详情列表)。
 
     评估规则来自 TEST_CASES 的期望值。
     如果某用例失败，会基于“真值规则”给出诊断信息（如缺大写、缺数字等）。
     """
-    failures: List[str] = []
+    failures: list[str] = []
     for pw, expected in TEST_CASES:
         try:
             result = bool(func(pw))
@@ -105,24 +104,24 @@ def generate_initial_function(system_prompt: str) -> str:
     return extract_code_block(response.message.content)
 
 
-def your_build_reflexion_context(prev_code: str, failures: List[str]) -> str:
+def your_build_reflexion_context(prev_code: str, failures: list[str]) -> str:
     """TODO: Build the user message for the reflexion step using prev_code and failures.
 
     Return a string that will be sent as the user content alongside the reflexion system prompt.
     """
     return f"""
-上一轮代码: 
+上一轮代码:
 {prev_code}
-失败的测试用例: 
+失败的测试用例:
 {" ".join(failures)}
 """
 
 
 def apply_reflexion(
     reflexion_prompt: str,
-    build_context: Callable[[str, List[str]], str],
+    build_context: Callable[[str, list[str]], str],
     prev_code: str,
-    failures: List[str],
+    failures: list[str],
 ) -> str:
     reflection_context = build_context(prev_code, failures)
     print(f"REFLECTION CONTEXT: {reflection_context}, {reflexion_prompt}")
@@ -140,7 +139,7 @@ def apply_reflexion(
 def run_reflexion_flow(
     system_prompt: str,
     reflexion_prompt: str,
-    build_context: Callable[[str, List[str]], str],
+    build_context: Callable[[str, list[str]], str],
 ) -> bool:
     # 1) Generate initial function
     initial_code = generate_initial_function(system_prompt)

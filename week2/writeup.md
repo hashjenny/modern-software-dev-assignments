@@ -11,8 +11,8 @@ Fill out all of the `TODO`s in this file.
 
 ## SUBMISSION DETAILS
 
-Name: **hashjenny**   
-SUNet ID: **TODO**   
+Name: **hashjenny**
+SUNet ID: **TODO**
 Citations: **TODO**
 
 This assignment took me about **4.5** hours to do.
@@ -153,4 +153,3 @@ week2/writeup.md: L131-L149（在 Exercise 5 追加本次 Prompt 与 Generated C
 1. Hit a `Command (⌘) + F` (or `Ctrl + F`) to find any remaining `TODO`s in this file. If no results are found, congratulations – you've completed all required fields.
 2. Make sure you have all changes pushed to your remote repository for grading.
 3. Submit via Gradescope.
-
