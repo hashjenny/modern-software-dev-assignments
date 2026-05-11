@@ -21,6 +21,7 @@
 ## 技术栈要求
 
 构建同一个应用的 3 个独立版本，每个版本使用不同的技术栈。例如：
+
 - MERN (MongoDB, Express, React, Node.js)
 - MEVN (MongoDB, Express, Vue.js, Node.js)
 - Django + React（或 Vue）
@@ -36,7 +37,7 @@
 
 Bolt 是一个 AI 辅助开发平台，可以根据自然语言提示生成网站、Web 应用和移动应用。用户可以用纯文本描述他们的想法，Bolt 会在几分钟内产生一个功能原型——从着陆页和电子商务网站到 CRM 和移动工具。点击[此处](https://support.bolt.new/building/intro-bolt)了解更多。
 
-### 领取您的 Bolt 积分：
+### 领取您的 Bolt 积分
 
 1. 找到我们通过电子邮件发送给您的唯一 Bolt 促销代码。
 2. 访问 [bolt.new](bolt.new) 并创建一个账户。
