@@ -12,5 +12,6 @@ def test_create_and_complete_action_item(client):
 
     r = client.get("/action-items/")
     assert r.status_code == 200
-    items = r.json()
-    assert len(items) == 1
+    result = r.json()
+    assert result["total"] == 1
+    assert len(result["items"]) == 1

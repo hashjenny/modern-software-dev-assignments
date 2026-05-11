@@ -3,56 +3,64 @@
 Minimal full‑stack starter for experimenting with autonomous coding agents.
 
 - FastAPI backend with SQLite (SQLAlchemy)
-- Static frontend (no Node toolchain needed)
+- Static frontend or Vite+React (optional)
 - Minimal tests (pytest)
 - Pre-commit (black + ruff)
 - Tasks to practice agent-driven workflows
 
-## Quickstart
+## Quickstart (UV Environment)
 
-1) Create and activate a virtualenv, then install dependencies
-
-```bash
-cd /Users/mihaileric/Documents/code/modern-software-dev-assignments
-python -m venv .venv && source .venv/bin/activate
-pip install -e .[dev]
-```
-
-2) (Optional) Install pre-commit hooks
+1) Install dependencies
 
 ```bash
-pre-commit install
+cd week5 && uv sync --python ../.venv
 ```
 
-3) Run the app (from `week5/`)
+2) Run the app
 
 ```bash
 cd week5 && make run
 ```
 
-Open `http://localhost:8000` for the frontend and `http://localhost:8000/docs` for the API docs.
+3) Open `http://localhost:8000` for the frontend and `http://localhost:8000/docs` for the API docs.
 
 ## Structure
 
 ```
 backend/                # FastAPI app
 frontend/               # Static UI served by FastAPI
+frontend/ui/            # Optional Vite+React app (build to dist/)
+api/                    # Vercel serverless handler
 data/                   # SQLite DB + seed
 docs/                   # TASKS for agent-driven workflows
 ```
 
-## Tests
+## Commands
 
 ```bash
-cd week5 && make test
+make run       # Start dev server (port 8000)
+make test      # Run pytest tests
+make format    # Run black and ruff --fix
+make lint      # Run ruff check
+make seed      # Apply seed data to database
+
+make web-install   # Install React frontend deps
+make web-dev       # Run Vite dev server
+make web-build     # Build React frontend to dist/
+make web-test      # Run React tests
 ```
 
-## Formatting/Linting
+## Optional: Vite + React Frontend
+
+To enable the React frontend:
 
 ```bash
-cd week5 && make format
-cd week5 && make lint
+make web-install   # Install dependencies
+make web-build     # Build to dist/
+make run           # Now serves React build
 ```
+
+For Vercel deployment, see DEPLOY.md.
 
 ## Configuration
 
