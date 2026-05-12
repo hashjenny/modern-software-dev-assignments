@@ -34,6 +34,8 @@ def list_items(
 
 @router.post("/", response_model=ActionItemRead, status_code=201)
 def create_item(payload: ActionItemCreate, db: Session = Depends(get_db)) -> ActionItemRead:
+    if len(payload.description) > 2000:
+        raise HTTPException(status_code=422, detail="description must be at most 2000 characters")
     item = ActionItem(description=payload.description, completed=False)
     db.add(item)
     db.flush()
@@ -67,4 +69,21 @@ def patch_item(
     db.add(item)
     db.flush()
     db.refresh(item)
+    return ActionItemRead.model_validate(item)
+
+
+@router.delete("/{item_id}", status_code=204)
+def delete_item(item_id: int, db: Session = Depends(get_db)) -> None:
+    item = db.get(ActionItem, item_id)
+    if not item:
+        raise HTTPException(status_code=404, detail="Action item not found")
+    db.delete(item)
+    db.flush()
+
+
+@router.get("/{item_id}", response_model=ActionItemRead)
+def get_item(item_id: int, db: Session = Depends(get_db)) -> ActionItemRead:
+    item = db.get(ActionItem, item_id)
+    if not item:
+        raise HTTPException(status_code=404, detail="Action item not found")
     return ActionItemRead.model_validate(item)

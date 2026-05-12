@@ -34,6 +34,10 @@ def list_notes(
 
 @router.post("/", response_model=NoteRead, status_code=201)
 def create_note(payload: NoteCreate, db: Session = Depends(get_db)) -> NoteRead:
+    if len(payload.title) > 200:
+        raise HTTPException(status_code=422, detail="title must be at most 200 characters")
+    if len(payload.content) > 10000:
+        raise HTTPException(status_code=422, detail="content must be at most 10000 characters")
     note = Note(title=payload.title, content=payload.content)
     db.add(note)
     db.flush()
@@ -62,3 +66,12 @@ def get_note(note_id: int, db: Session = Depends(get_db)) -> NoteRead:
     if not note:
         raise HTTPException(status_code=404, detail="Note not found")
     return NoteRead.model_validate(note)
+
+
+@router.delete("/{note_id}", status_code=204)
+def delete_note(note_id: int, db: Session = Depends(get_db)) -> None:
+    note = db.get(Note, note_id)
+    if not note:
+        raise HTTPException(status_code=404, detail="Note not found")
+    db.delete(note)
+    db.flush()
