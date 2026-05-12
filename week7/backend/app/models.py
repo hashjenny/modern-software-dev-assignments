@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Table, Text
-from sqlalchemy.orm import declarative_base, relationship
+from sqlalchemy.orm import Mapped, declarative_base, mapped_column, relationship
 
 Base = declarative_base()
 
@@ -38,7 +38,7 @@ class ActionItem(Base, TimestampMixin):
 class Tag(Base, TimestampMixin):
     __tablename__ = "tags"
 
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(50), nullable=False, unique=True)
-    color = Column(String(7), nullable=False, default="#888888")
-    notes = relationship("Note", secondary=note_tags, back_populates="tags")
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    name: Mapped[str] = mapped_column(String(50), nullable=False, unique=True)
+    color: Mapped[str] = mapped_column(String(7), nullable=False, default="#888888")
+    notes: Mapped[list[Note]] = relationship("Note", secondary=note_tags, back_populates="tags")
