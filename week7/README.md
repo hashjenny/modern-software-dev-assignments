@@ -22,13 +22,13 @@ python -m venv .venv && source .venv/bin/activate
 pip install -e .[dev]
 ```
 
-2) (Optional) Install pre-commit hooks
+1) (Optional) Install pre-commit hooks
 
 ```bash
 pre-commit install
 ```
 
-3) Run the app (from `week6/`)
+1) Run the app (from `week6/`)
 
 ```bash
 cd week7 && make run

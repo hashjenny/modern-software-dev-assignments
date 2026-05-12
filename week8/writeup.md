@@ -1,5 +1,7 @@
 # Week 8 Write-up
+
 Tip: To preview this markdown file
+
 - On Mac, press `Command (⌘) + Shift + V`
 - On Windows/Linux, press `Ctrl + Shift + V`
 
@@ -15,14 +17,14 @@ Citations: **TODO**
 
 This assignment took me about **TODO** hours to do.
 
-
 ## App Concept
+
 ```
 TODO: Provide a brief, high-level overview of your app, highlighting its main features. This overview should be the same across all three app versions.
 ```
 
-
 ## Version #1 Description
+
 ```
 APP DETAILS:
 ===============
@@ -43,6 +45,7 @@ c. Approximate time-to-first-run and time-to-feature metrics: TODO
 ```
 
 ## Version #2 Description
+
 ```
 APP DETAILS:
 ===============
@@ -63,6 +66,7 @@ c. Approximate time-to-first-run and time-to-feature metrics: TODO
 ```
 
 ## Version #3 Description
+
 ```
 APP DETAILS:
 ===============
