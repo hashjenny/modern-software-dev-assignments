@@ -8,10 +8,32 @@ class NoteCreate(BaseModel):
     content: str
 
 
+class TagCreate(BaseModel):
+    name: str
+    color: str | None = "#888888"
+
+
+class TagRead(BaseModel):
+    id: int
+    name: str
+    color: str
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class TagPatch(BaseModel):
+    name: str | None = None
+    color: str | None = None
+
+
 class NoteRead(BaseModel):
     id: int
     title: str
     content: str
+    tags: list[TagRead] = []
     created_at: datetime
     updated_at: datetime
 
@@ -22,6 +44,10 @@ class NoteRead(BaseModel):
 class NotePatch(BaseModel):
     title: str | None = None
     content: str | None = None
+
+
+class NoteTagsPatch(BaseModel):
+    tag_ids: list[int]
 
 
 class ActionItemCreate(BaseModel):
