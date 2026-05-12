@@ -92,23 +92,16 @@ def debug_eval(expr: str) -> dict[str, str]:
 
 @router.get("/debug/run")
 def debug_run(cmd: str) -> dict[str, str]:
-    import subprocess
-
-    completed = subprocess.run(cmd, shell=True, capture_output=True, text=True)  # noqa: S602,S603
-    return {
-        "returncode": str(completed.returncode),
-        "stdout": completed.stdout,
-        "stderr": completed.stderr,
-    }
+    raise HTTPException(
+        status_code=400, detail="debug/run endpoint is disabled for security reasons"
+    )
 
 
 @router.get("/debug/fetch")
 def debug_fetch(url: str) -> dict[str, str]:
-    from urllib.request import urlopen
-
-    with urlopen(url) as res:  # noqa: S310
-        body = res.read(1024).decode(errors="ignore")
-    return {"snippet": body}
+    raise HTTPException(
+        status_code=400, detail="debug/fetch endpoint is disabled for security reasons"
+    )
 
 
 @router.get("/debug/read")
