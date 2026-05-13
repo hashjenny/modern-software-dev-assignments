@@ -81,7 +81,7 @@ def delete_note(note_id: int, db: Session = Depends(get_db)) -> None:
 
 @router.post("/{note_id}/tags/", response_model=NoteRead)
 def add_note_tag(note_id: int, payload: NoteTagLinkCreate, db: Session = Depends(get_db)) -> NoteRead:
-    note = db.get(Note, note_id)
+    note = db.execute(select(Note).options(selectinload(Note.tags)).where(Note.id == note_id)).scalar_one_or_none()
     if not note:
         raise HTTPException(status_code=404, detail="Note not found")
     tag = db.get(Tag, payload.tag_id)
@@ -96,7 +96,7 @@ def add_note_tag(note_id: int, payload: NoteTagLinkCreate, db: Session = Depends
 
 @router.delete("/{note_id}/tags/{tag_id}", response_model=NoteRead)
 def remove_note_tag(note_id: int, tag_id: int, db: Session = Depends(get_db)) -> NoteRead:
-    note = db.get(Note, note_id)
+    note = db.execute(select(Note).options(selectinload(Note.tags)).where(Note.id == note_id)).scalar_one_or_none()
     if not note:
         raise HTTPException(status_code=404, detail="Note not found")
     tag = db.get(Tag, tag_id)
