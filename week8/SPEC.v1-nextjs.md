@@ -8,7 +8,7 @@
 | 语言 | TypeScript |
 | 数据库 | SQLite（通过 `better-sqlite3` 或 `libsql`） |
 | ORM | Prisma（SQLite 原生支持好） |
-| UI | shadcn-ui + 内置组件 |
+| UI | tailwindcss + 内置组件 |
 | 认证 | 单用户（无登录） |
 | 部署 | 本地运行 |
 
