@@ -55,21 +55,10 @@
 
     <main class="main-content">
         <header class="header">
-            @if (isLoggedIn)
-            {
-                <div class="flex items-center gap-md">
-                    <div class="user-avatar">@GetUserInitial()</div>
-                    <span class="text-secondary">@userName</span>
-                    <button class="btn btn-ghost" @onclick="HandleLogout">登出</button>
-                </div>
-            }
-            else
-            {
-                <div class="flex items-center gap-md">
-                    <a href="/login" class="btn btn-ghost">登录</a>
-                    <a href="/register" class="btn btn-primary">注册</a>
-                </div>
-            }
+            <div class="flex items-center gap-md">
+                <div class="user-avatar">@GetUserInitial()</div>
+                <span class="text-secondary">@userName</span>
+            </div>
         </header>
 
         <div class="content-area">
@@ -97,19 +86,11 @@
 </style>
 
 @code {
-    private bool isLoggedIn;
     private string? userName;
 
     protected override async Task OnInitializedAsync()
     {
         userName = await AuthService.GetUserNameAsync();
-        isLoggedIn = !string.IsNullOrEmpty(userName);
-    }
-
-    private async Task HandleLogout()
-    {
-        await AuthService.LogoutAsync();
-        Navigation.NavigateTo("/", forceLoad: true);
     }
 
     private string GetUserInitial()

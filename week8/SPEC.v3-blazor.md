@@ -8,7 +8,7 @@
 | 语言 | C# 12 |
 | 数据库 | LiteDB（嵌入式 NoSQL） |
 | ORM | LiteDB 原生驱动（`LiteDB` NuGet 包） |
-| 认证 | 多用户（ASP.NET Core Identity / Cookie 认证） |
+| 认证 | 单用户模式（默认用户） |
 | 部署 | Docker（.NET 官方镜像） |
 
 ---
@@ -28,19 +28,15 @@ notehub-blazor/
 │   │   ├── CategoryList.razor
 │   │   ├── CategoryDetail.razor
 │   │   └── CategoryEdit.razor
-│   ├── Search/
-│   │   └── SearchResults.razor
-│   └── Auth/
-│       ├── Login.razor
-│       └── Register.razor
+│   └── Search/
+│       └── SearchResults.razor
 ├── Components/
 │   ├── NoteCard.razor
 │   ├── CategoryCard.razor
-│   └── Navigation.razor
+│   └── MainLayout.razor
 ├── Models/
 │   ├── Note.cs
-│   ├── Category.cs
-│   └── User.cs
+│   └── Category.cs
 ├── Services/
 │   ├── INoteService.cs
 │   ├── NoteService.cs
@@ -87,10 +83,6 @@ public class Category
 }
 ```
 
-### 3.3 User（ASP.NET Core Identity）
-
-使用 ASP.NET Core 内置 Identity 系统，User 模型由 Identity 提供。
-
 ---
 
 ## 4. 服务层设计
@@ -121,6 +113,16 @@ public interface ICategoryService
 }
 ```
 
+### 4.3 IAuthService
+
+```csharp
+public interface IAuthService
+{
+    Task<string?> GetUserIdAsync();
+    Task<string?> GetUserNameAsync();
+}
+```
+
 ---
 
 ## 5. 页面路由
@@ -136,8 +138,6 @@ public interface ICategoryService
 | `/categories` | `CategoryList.razor` | 分类列表 |
 | `/categories/{id}` | `CategoryDetail.razor` | 某分类下的笔记 |
 | `/search?q=` | `SearchResults.razor` | 搜索结果 |
-| `/login` | `Login.razor` | 登录 |
-| `/register` | `Register.razor` | 注册 |
 
 ---
 
@@ -147,7 +147,7 @@ public interface ICategoryService
 |------|------|
 | `NoteCard.razor` | 笔记卡片，展示标题 + 时间 + 分类 |
 | `CategoryCard.razor` | 分类卡片，展示名称 + 笔记数量 |
-| `Navigation.razor` | 顶部导航栏（含登录/登出状态） |
+| `MainLayout.razor` | 主布局，包含侧边栏导航和头部 |
 
 ---
 
@@ -155,8 +155,8 @@ public interface ICategoryService
 
 - 笔记标题：必填，最大 200 字符（`[Required]` + `[StringLength(200)]`）
 - 分类名称：必填，唯一，最大 100 字符
-- 每个用户只能操作自己的笔记和分类（`UserId` 过滤）
-- 错误处理：Blazor `EditForm` 验证 + `Toast` 提示
+- 使用默认用户 ID（`default-user`）进行所有操作
+- 错误处理：Blazor `EditForm` 验证
 
 ---
 
@@ -225,7 +225,6 @@ docker-compose up --build
 
 ```xml
 <PackageReference Include="LiteDB" Version="5.0.21" />
-<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.0" />
 ```
 
 ---
@@ -233,6 +232,6 @@ docker-compose up --build
 ## 11. 备注
 
 - Blazor Server 通过 SignalR 保持 WebSocket 连接，页面状态在服务端管理
-- 多用户认证使用 ASP.NET Core Identity + Cookie
+- 单用户模式，使用固定的用户 ID 和名称
 - LiteDB 是嵌入式数据库，数据文件存储在 `App_Data/notehub.db`
 - 搜索使用 LiteDB 字符串包含查询（`Contains`）
