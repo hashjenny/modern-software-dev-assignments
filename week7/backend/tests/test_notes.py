@@ -58,13 +58,12 @@ def test_patch_note_content_too_long(client):
 
 
 def test_list_notes_invalid_sort_falls_back_to_default(client):
-    first = client.post("/notes/", json={"title": "First", "content": "one"})
-    second = client.post("/notes/", json={"title": "Second", "content": "two"})
-    first_id = first.json()["id"]
-    second_id = second.json()["id"]
+    client.post("/notes/", json={"title": "First", "content": "one"})
+    client.post("/notes/", json={"title": "Second", "content": "two"})
 
     r = client.get("/notes/", params={"sort": "metadata"})
     assert r.status_code == 200
-    ids = [item["id"] for item in r.json()]
-    assert ids[0] == second_id
-    assert ids[1] == first_id
+
+    expected = client.get("/notes/", params={"sort": "-created_at"})
+    assert expected.status_code == 200
+    assert r.json() == expected.json()

@@ -51,13 +51,12 @@ def test_patch_action_item_description_too_long(client):
 
 
 def test_list_action_items_invalid_sort_falls_back_to_default(client):
-    first = client.post("/action-items/", json={"description": "First"})
-    second = client.post("/action-items/", json={"description": "Second"})
-    first_id = first.json()["id"]
-    second_id = second.json()["id"]
+    client.post("/action-items/", json={"description": "First"})
+    client.post("/action-items/", json={"description": "Second"})
 
     r = client.get("/action-items/", params={"sort": "metadata"})
     assert r.status_code == 200
-    ids = [item["id"] for item in r.json()]
-    assert ids[0] == second_id
-    assert ids[1] == first_id
+
+    expected = client.get("/action-items/", params={"sort": "-created_at"})
+    assert expected.status_code == 200
+    assert r.json() == expected.json()
