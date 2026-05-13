@@ -6,11 +6,17 @@
         <NotFound>
             <PageTitle>Not found</PageTitle>
             <LayoutView Layout="@typeof(MainLayout)">
-                <MudContainer MaxWidth="MaxWidth.Small" Class="mt-8">
-                    <MudText Typo="Typo.h4" Color="Color.Default">404 - 页面未找到</MudText>
-                    <MudText Color="Color.Default" Class="mt-2">抱歉，这个页面不存在。</MudText>
-                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/" Class="mt-4">返回首页</MudButton>
-                </MudContainer>
+                <div class="auth-page">
+                    <div class="auth-card">
+                        <div class="auth-header">
+                            <h1 class="auth-title">404</h1>
+                            <p class="auth-subtitle">抱歉，这个页面不存在。</p>
+                        </div>
+                        <div class="form-actions" style="justify-content: center;">
+                            <a href="/" class="btn btn-primary">返回首页</a>
+                        </div>
+                    </div>
+                </div>
             </LayoutView>
         </NotFound>
     </Router>

@@ -2,463 +2,101 @@
 @layout AuthLayout
 @inject NavigationManager Navigation
 @inject IAuthService AuthService
-@inject ISnackbar Snackbar
 
-<div class="nh-auth-page">
-    <div class="nh-auth-container animate-in">
-        <div class="nh-auth-header">
-            <div class="nh-auth-brand">
-                <div class="nh-auth-logo">N</div>
-                <div class="nh-auth-brand-text">
-                    <span class="nh-auth-brand-name">NoteHub</span>
-                    <span class="nh-auth-brand-tagline">记录你的思考</span>
-                </div>
+<div class="auth-container animate-fade-in">
+    <div class="auth-card">
+        <div class="auth-logo">
+            <div class="auth-logo-icon">N</div>
+            <div class="auth-logo-text">
+                <div class="auth-logo-title">NoteHub</div>
+                <div class="auth-logo-subtitle">记录你的思考</div>
             </div>
         </div>
 
-        <div class="nh-auth-card">
-            <div class="nh-auth-card-accent"></div>
-            <h1 class="nh-auth-title">创建账号</h1>
-            <p class="nh-auth-subtitle">开始你的笔记之旅</p>
+        <div class="auth-header">
+            <h1 class="auth-title">创建账号</h1>
+            <p class="auth-subtitle">开始你的笔记之旅</p>
+        </div>
 
-            <MudForm @ref="form" @bind-IsValid="@success" @bind-Errors="@errors">
-                <div class="nh-form-group animate-in-delay-1">
-                    <MudTextField T="string" @bind-Value="model.UserName" Label="用户名"
-                        Required="true" RequiredError="用户名不能为空"
-                        Variant="Variant.Outlined" Class="nh-mud-field" />
+        <EditForm Model="@model" OnValidSubmit="@HandleRegister">
+            <div class="form-group">
+                <label class="form-label">用户名</label>
+                <InputText @bind-Value="model.UserName" class="form-input" placeholder="请输入用户名" />
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">邮箱</label>
+                <InputText @bind-Value="model.Email" type="email" class="form-input" placeholder="请输入邮箱" />
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">密码</label>
+                <InputText @bind-Value="model.Password" type="password" class="form-input" placeholder="请输入密码" />
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">确认密码</label>
+                <InputText @bind-Value="model.ConfirmPassword" type="password" class="form-input" placeholder="请再次输入密码" />
+            </div>
+
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="alert alert-danger animate-slide-up">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="15" y1="9" x2="9" y2="15"></line>
+                        <line x1="9" y1="9" x2="15" y2="15"></line>
+                    </svg>
+                    @errorMessage
                 </div>
+            }
 
-                <div class="nh-form-group animate-in-delay-2">
-                    <MudTextField T="string" @bind-Value="model.Email" Label="邮箱"
-                        Required="true" RequiredError="邮箱不能为空"
-                        Variant="Variant.Outlined" Class="nh-mud-field"
-                        Validation="@(new Func<string, string>(ValidateEmail))" />
-                </div>
-
-                <div class="nh-form-group animate-in-delay-3">
-                    <MudTextField T="string" @bind-Value="model.Password" Label="密码"
-                        Required="true" RequiredError="密码不能为空"
-                        InputType="@(showPassword ? InputType.Text : InputType.Password)"
-                        Variant="Variant.Outlined" Class="nh-mud-field"
-                        Validation="@(new Func<string, string>(ValidatePassword))"
-                        Adornment="Adornment.End" AdornmentIcon="@(showPassword ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
-                        OnAdornmentClick="TogglePasswordVisibility" />
-                </div>
-
-                <div class="nh-form-group animate-in-delay-4">
-                    <MudTextField T="string" @bind-Value="model.ConfirmPassword" Label="确认密码"
-                        Required="true" RequiredError="确认密码不能为空"
-                        InputType="@(showPassword ? InputType.Text : InputType.Password)"
-                        Variant="Variant.Outlined" Class="nh-mud-field"
-                        Validation="@(new Func<string, string>(ValidateConfirmPassword))" />
-                </div>
-
-                @if (!string.IsNullOrEmpty(errorMessage))
+            <button type="submit" class="btn btn-primary btn-lg btn-block" disabled="@loading">
+                @if (loading)
                 {
-                    <div class="nh-alert nh-alert-error animate-in-delay-3">
-                        <span class="material-icons">error_outline</span>
-                        @errorMessage
-                    </div>
+                    <span class="loading-spinner"></span>
                 }
+                注册
+            </button>
+        </EditForm>
 
-                <MudButton Variant="Variant.Filled" Class="nh-submit-btn animate-in-delay-4"
-                    OnClick="HandleRegister" Disabled="@(!success || loading)" FullWidth="true">
-                    @if (loading)
-                    {
-                        <div class="nh-spinner"></div>
-                        <span>注册中...</span>
-                    }
-                    else
-                    {
-                        <span>注册</span>
-                        <span class="material-icons">arrow_forward</span>
-                    }
-                </MudButton>
-            </MudForm>
-
-            <div class="nh-auth-footer animate-in-delay-5">
-                <div class="nh-divider-text">
-                    <span>已有账号?</span>
-                </div>
-                <MudLink Href="/login" Class="nh-auth-link">
-                    立即登录
-                    <span class="material-icons">chevron_right</span>
-                </MudLink>
-            </div>
-        </div>
-
-        <div class="nh-auth-decoration">
-            <div class="nh-deco-circle nh-deco-circle-1"></div>
-            <div class="nh-deco-circle nh-deco-circle-2"></div>
-            <div class="nh-deco-line"></div>
+        <div class="auth-footer">
+            <span>已有账号？</span>
+            <a href="/login" class="auth-link">
+                立即登录
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                    <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+            </a>
         </div>
     </div>
 </div>
 
-<style>
-    .nh-auth-page {
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: var(--color-bg-primary);
-        padding: var(--space-xl);
-        position: relative;
-        overflow: hidden;
-    }
-
-    .nh-auth-page::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(circle at 30% 20%, rgba(196, 93, 53, 0.03) 0%, transparent 50%),
-                    radial-gradient(circle at 70% 80%, rgba(232, 168, 112, 0.05) 0%, transparent 50%);
-        animation: floatBg 20s ease-in-out infinite;
-    }
-
-    @@keyframes floatBg {
-        0%, 100% { transform: translate(0, 0) rotate(0deg); }
-        50% { transform: translate(-2%, -2%) rotate(1deg); }
-    }
-
-    .nh-auth-container {
-        position: relative;
-        z-index: 1;
-        width: 100%;
-        max-width: 420px;
-    }
-
-    .nh-auth-header {
-        text-align: center;
-        margin-bottom: var(--space-xl);
-    }
-
-    .nh-auth-brand {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: var(--space-md);
-    }
-
-    .nh-auth-logo {
-        width: 48px;
-        height: 48px;
-        background: linear-gradient(135deg, var(--color-accent-primary), var(--color-accent-secondary));
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-family: 'Syne', sans-serif;
-        font-weight: 800;
-        font-size: 1.5rem;
-        color: white;
-        box-shadow: 0 4px 12px rgba(196, 93, 53, 0.3);
-    }
-
-    .nh-auth-brand-text {
-        display: flex;
-        flex-direction: column;
-        text-align: left;
-    }
-
-    .nh-auth-brand-name {
-        font-family: 'Syne', sans-serif;
-        font-weight: 800;
-        font-size: 1.75rem;
-        color: var(--color-text-primary);
-        letter-spacing: -0.02em;
-    }
-
-    .nh-auth-brand-tagline {
-        font-size: 0.8rem;
-        color: var(--color-text-muted);
-    }
-
-    .nh-auth-card {
-        background: var(--color-bg-paper);
-        border: 1px solid var(--color-border);
-        border-radius: 4px;
-        padding: var(--space-xl);
-        position: relative;
-        box-shadow: 0 4px 24px var(--color-shadow);
-    }
-
-    .nh-auth-card-accent {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(90deg, var(--color-accent-primary), var(--color-accent-secondary));
-    }
-
-    .nh-auth-title {
-        font-family: 'Syne', sans-serif;
-        font-weight: 700;
-        font-size: 1.5rem;
-        color: var(--color-text-primary);
-        margin: 0 0 var(--space-xs);
-        text-align: center;
-    }
-
-    .nh-auth-subtitle {
-        font-size: 0.9rem;
-        color: var(--color-text-muted);
-        text-align: center;
-        margin: 0 0 var(--space-xl);
-    }
-
-    .nh-form-group {
-        margin-bottom: var(--space-lg);
-    }
-
-    .nh-mud-field {
-        --mud-palette-primary: var(--color-accent-primary);
-    }
-
-    .nh-mud-field input {
-        font-family: 'Source Serif 4', serif;
-    }
-
-    .nh-alert {
-        padding: 12px 16px;
-        border-radius: 4px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-size: 0.85rem;
-        margin-bottom: var(--space-lg);
-    }
-
-    .nh-alert-error {
-        background: rgba(239, 68, 68, 0.08);
-        color: #DC2626;
-        border-left: 3px solid #EF4444;
-    }
-
-    .nh-alert .material-icons {
-        font-size: 1.1rem;
-    }
-
-    .nh-submit-btn {
-        font-family: 'Syne', sans-serif !important;
-        font-weight: 600 !important;
-        font-size: 0.85rem !important;
-        letter-spacing: 0.05em !important;
-        text-transform: uppercase !important;
-        background: var(--color-accent-primary) !important;
-        color: white !important;
-        border-radius: 4px !important;
-        padding: 14px 24px !important;
-        height: auto !important;
-        transition: all 150ms ease !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        gap: 8px !important;
-    }
-
-    .nh-submit-btn:hover:not(:disabled) {
-        background: #A84D2B !important;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(196, 93, 53, 0.3);
-    }
-
-    .nh-submit-btn:disabled {
-        background: var(--color-border-strong) !important;
-    }
-
-    .nh-submit-btn .material-icons {
-        font-size: 1rem;
-    }
-
-    .nh-spinner {
-        width: 16px;
-        height: 16px;
-        border: 2px solid rgba(255, 255, 255, 0.3);
-        border-top-color: white;
-        border-radius: 50%;
-        animation: spin 0.8s linear infinite;
-    }
-
-    @@keyframes spin {
-        to { transform: rotate(360deg); }
-    }
-
-    .nh-auth-footer {
-        margin-top: var(--space-xl);
-        text-align: center;
-    }
-
-    .nh-divider-text {
-        display: flex;
-        align-items: center;
-        gap: var(--space-md);
-        margin-bottom: var(--space-md);
-    }
-
-    .nh-divider-text::before,
-    .nh-divider-text::after {
-        content: '';
-        flex: 1;
-        height: 1px;
-        background: var(--color-border);
-    }
-
-    .nh-divider-text span {
-        font-size: 0.8rem;
-        color: var(--color-text-muted);
-    }
-
-    .nh-auth-link {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        font-family: 'Syne', sans-serif;
-        font-weight: 600;
-        font-size: 0.85rem;
-        color: var(--color-accent-primary) !important;
-        text-decoration: none !important;
-        transition: gap 150ms ease;
-    }
-
-    .nh-auth-link:hover {
-        gap: 8px;
-    }
-
-    .nh-auth-link .material-icons {
-        font-size: 1rem;
-    }
-
-    /* Decorative elements */
-    .nh-auth-decoration {
-        position: absolute;
-        top: 0;
-        right: -100px;
-        width: 200px;
-        height: 200px;
-        pointer-events: none;
-    }
-
-    .nh-deco-circle {
-        position: absolute;
-        border-radius: 50%;
-        opacity: 0.1;
-    }
-
-    .nh-deco-circle-1 {
-        width: 300px;
-        height: 300px;
-        background: var(--color-accent-primary);
-        top: -100px;
-        right: -150px;
-    }
-
-    .nh-deco-circle-2 {
-        width: 150px;
-        height: 150px;
-        background: var(--color-accent-secondary);
-        bottom: 20%;
-        right: -50px;
-    }
-
-    .nh-deco-line {
-        position: absolute;
-        width: 80px;
-        height: 2px;
-        background: linear-gradient(90deg, var(--color-accent-primary), transparent);
-        top: 50%;
-        right: 0;
-        transform: rotate(-45deg);
-    }
-
-    /* Animations */
-    .animate-in {
-        animation: fadeSlideUp 0.6s ease forwards;
-    }
-
-    .animate-in-delay-1 { animation-delay: 0.15s; opacity: 0; }
-    .animate-in-delay-2 { animation-delay: 0.25s; opacity: 0; }
-    .animate-in-delay-3 { animation-delay: 0.35s; opacity: 0; }
-    .animate-in-delay-4 { animation-delay: 0.45s; opacity: 0; }
-    .animate-in-delay-5 { animation-delay: 0.55s; opacity: 0; }
-
-    @@keyframes fadeSlideUp {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* Responsive */
-    @@media (max-width: 480px) {
-        .nh-auth-page {
-            padding: var(--space-md);
-        }
-
-        .nh-auth-card {
-            padding: var(--space-lg);
-        }
-    }
-</style>
-
 @code {
-    private MudForm form = null!;
     private RegisterModel model = new();
-    private string[] errors = { };
-    private bool success;
     private bool loading;
-    private bool showPassword;
     private string? errorMessage;
-
-    private void TogglePasswordVisibility()
-    {
-        showPassword = !showPassword;
-    }
-
-    private string ValidateEmail(string email)
-    {
-        if (string.IsNullOrWhiteSpace(email))
-            return "邮箱不能为空";
-        if (!email.Contains("@"))
-            return "请输入有效的邮箱地址";
-        return null!;
-    }
-
-    private string ValidatePassword(string password)
-    {
-        if (string.IsNullOrWhiteSpace(password))
-            return "密码不能为空";
-        if (password.Length < 6)
-            return "密码长度至少为6位";
-        return null!;
-    }
-
-    private string ValidateConfirmPassword(string confirmPassword)
-    {
-        if (string.IsNullOrWhiteSpace(confirmPassword))
-            return "确认密码不能为空";
-        if (confirmPassword != model.Password)
-            return "两次输入的密码不一致";
-        return null!;
-    }
 
     private async Task HandleRegister()
     {
+        if (model.Password != model.ConfirmPassword)
+        {
+            errorMessage = "两次输入的密码不一致";
+            return;
+        }
+
         errorMessage = null;
         loading = true;
 
         var result = await AuthService.RegisterAsync(model.UserName, model.Email, model.Password);
         if (result)
         {
-            Snackbar.Add("注册成功！请登录", Severity.Success);
             Navigation.NavigateTo("/login", forceLoad: true);
         }
         else
         {
             errorMessage = "用户名已存在";
-            Snackbar.Add("注册失败，用户名已存在", Severity.Error);
         }
 
         loading = false;

@@ -2,23 +2,44 @@
 @inject INoteService NoteService
 @inject IAuthService AuthService
 @inject NavigationManager Navigation
-@using notehub_blazor.Components
-
 
 @if (note != null)
 {
-    <MudAlert Severity="Severity.Warning" Class="mb-4">
-        <MudText Typo="Typo.h6">确认删除</MudText>
-        <MudText>确定要删除笔记 "<strong>@note.Title</strong>" 吗？此操作不可撤销。</MudText>
-    </MudAlert>
-
-    <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="HandleDelete" Class="mr-2">删除</MudButton>
-    <MudButton Variant="Variant.Outlined" OnClick="@(() => Navigation.NavigateTo($"/notes/{Id}"))">取消</MudButton>
+    <div class="card animate-slide-up">
+        <div class="card-header">
+            <h1 class="detail-title">确认删除</h1>
+        </div>
+        <div class="card-body">
+            <p class="text-secondary mb-lg">
+                确定要删除笔记 "<strong>@note.Title</strong>" 吗？此操作不可撤销。
+            </p>
+            <div class="form-actions">
+                <button class="btn btn-danger" @onclick="HandleDelete">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                    删除
+                </button>
+                <a href="/notes/@Id" class="btn btn-secondary">取消</a>
+            </div>
+        </div>
+    </div>
 }
 else
 {
-    <MudAlert Severity="Severity.Error">笔记不存在</MudAlert>
-    <MudButton Variant="Variant.Outlined" Href="/notes" Class="mt-2">返回列表</MudButton>
+    <div class="empty-state animate-scale-in">
+        <div class="empty-state-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="15" y1="9" x2="9" y2="15"></line>
+                <line x1="9" y1="9" x2="15" y2="15"></line>
+            </svg>
+        </div>
+        <p class="empty-state-title">笔记不存在</p>
+        <p class="empty-state-text">该笔记可能已被删除</p>
+        <a href="/notes" class="btn btn-primary">返回列表</a>
+    </div>
 }
 
 @code {
@@ -47,6 +68,4 @@ else
         await NoteService.DeleteAsync(Id, userId);
         Navigation.NavigateTo("/notes");
     }
-
-
 }

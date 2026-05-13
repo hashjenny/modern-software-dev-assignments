@@ -3,30 +3,41 @@
 @inject IAuthService AuthService
 @inject ICategoryService CategoryService
 @inject NavigationManager Navigation
-@using notehub_blazor.Components
 
-
-<MudText Typo="Typo.h4" Color="Color.Primary" Class="mb-4">笔记列表</MudText>
-<MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/notes/new" StartIcon="@Icons.Material.Filled.Add">
-    新建笔记
-</MudButton>
+<div class="page-header animate-slide-up">
+    <h1 class="page-title">笔记列表</h1>
+    <a href="/notes/new" class="btn btn-primary">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        <span>新建笔记</span>
+    </a>
+</div>
 
 @if (notes.Any())
 {
-    <MudGrid Class="mt-4">
+    <div class="grid grid-2 animate-slide-up animate-delay-1">
         @foreach (var note in notes)
         {
-            <MudItem xs="12" md="6">
-                <NoteCard Note="note" CategoryName="@GetCategoryName(note.CategoryId)" />
-            </MudItem>
+            <NoteCard Note="note" CategoryName="@GetCategoryName(note.CategoryId)" />
         }
-    </MudGrid>
+    </div>
 }
 else
 {
-    <MudAlert Severity="Severity.Info" Class="mt-4">
-        暂无笔记，<MudLink Href="/notes/new" Color="Color.Primary">创建第一条笔记</MudLink>
-    </MudAlert>
+    <div class="empty-state animate-scale-in">
+        <div class="empty-state-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <circle cx="12" cy="14" r="8"></circle>
+            </svg>
+        </div>
+        <p class="empty-state-title">暂无笔记</p>
+        <p class="empty-state-text">开始创建你的第一篇笔记吧</p>
+        <a href="/notes/new" class="btn btn-primary">创建笔记</a>
+    </div>
 }
 
 @code {

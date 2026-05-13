@@ -1,199 +1,50 @@
 @using notehub_blazor.Models
 
-<MudCard Class="nh-category-card animate-in" Elevation="0">
-    <div class="nh-category-card-accent"></div>
-    <MudCardHeader Class="nh-category-card-header">
-        <CardHeaderContent>
-            <div class="nh-category-icon-wrap">
-                <span class="material-icons">folder</span>
-            </div>
-            <MudText Typo="Typo.h6" Class="nh-category-name">@Category.Name</MudText>
-            <div class="nh-category-meta">
-                <span class="material-icons">schedule</span>
-                <span>@Category.CreatedAt.ToString("yyyy-MM-dd")</span>
-            </div>
-        </CardHeaderContent>
-    </MudCardHeader>
-    <MudCardContent Class="nh-category-card-content">
-        @if (NoteCount.HasValue && NoteCount > 0)
-        {
-            <div class="nh-category-stats">
-                <div class="nh-category-stat">
-                    <span class="nh-category-stat-value">@NoteCount</span>
-                    <span class="nh-category-stat-label">篇笔记</span>
-                </div>
-            </div>
-        }
-        else
-        {
-            <MudText Typo="Typo.body2" Color="Color.Default" Class="nh-category-empty">
-                暂无笔记
-            </MudText>
-        }
-    </MudCardContent>
-    <MudCardActions Class="nh-category-card-actions">
-        <MudButton Variant="Variant.Text" Color="Color.Default" Size="Size.Small" Href="@($"/categories/{Category.Id}")" Class="nh-category-action-btn">
-            <span class="material-icons">visibility</span>
-            <span>查看</span>
-        </MudButton>
-        <MudButton Variant="Variant.Text" Color="Color.Default" Size="Size.Small" Href="@($"/categories/{Category.Id}/edit")" Class="nh-category-action-btn">
-            <span class="material-icons">edit</span>
-            <span>编辑</span>
-        </MudButton>
-    </MudCardActions>
-</MudCard>
-
-<style>
-    .nh-category-card {
-        background: var(--color-bg-paper);
-        border: 1px solid var(--color-border);
-        border-radius: 4px;
-        transition: all 200ms ease;
-        position: relative;
-        overflow: hidden;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
+<div class="category-card animate-slide-up">
+    <div class="category-card-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+        </svg>
+    </div>
+    <div class="category-card-name">
+        <a href="/categories/@Category.Id">@Category.Name</a>
+    </div>
+    <div class="note-card-meta">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        <span>@Category.CreatedAt.ToString("yyyy-MM-dd")</span>
+    </div>
+    @if (NoteCount.HasValue && NoteCount > 0)
+    {
+        <div class="category-card-count">
+            <span>@NoteCount</span> 篇笔记
+        </div>
     }
-
-    .nh-category-card:hover {
-        border-color: var(--color-border-strong);
-        box-shadow: 0 8px 24px var(--color-shadow-strong);
-        transform: translateY(-4px);
+    else
+    {
+        <div class="category-card-count text-muted" style="font-style: italic;">暂无笔记</div>
     }
-
-    .nh-category-card:hover .nh-category-card-accent {
-        opacity: 1;
-    }
-
-    .nh-category-card-accent {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 4px;
-        height: 100%;
-        background: linear-gradient(180deg, var(--color-accent-secondary), var(--color-accent-gold));
-        opacity: 0;
-        transition: opacity 200ms ease;
-    }
-
-    .nh-category-card-header {
-        padding: var(--space-lg) !important;
-    }
-
-    .nh-category-icon-wrap {
-        width: 40px;
-        height: 40px;
-        background: var(--color-bg-secondary);
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-bottom: var(--space-md);
-    }
-
-    .nh-category-icon-wrap .material-icons {
-        font-size: 1.25rem;
-        color: var(--color-accent-secondary);
-    }
-
-    .nh-category-name {
-        font-family: 'Syne', sans-serif !important;
-        font-weight: 700 !important;
-        font-size: 1.1rem !important;
-        color: var(--color-text-primary) !important;
-        margin-bottom: var(--space-xs) !important;
-    }
-
-    .nh-category-meta {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        color: var(--color-text-muted);
-        font-size: 0.75rem;
-    }
-
-    .nh-category-meta .material-icons {
-        font-size: 0.85rem;
-        color: var(--color-text-muted);
-    }
-
-    .nh-category-card-content {
-        padding: 0 var(--space-lg) var(--space-md) !important;
-        flex: 1;
-    }
-
-    .nh-category-stats {
-        display: flex;
-        align-items: baseline;
-        gap: 4px;
-    }
-
-    .nh-category-stat {
-        display: flex;
-        align-items: baseline;
-        gap: 4px;
-    }
-
-    .nh-category-stat-value {
-        font-family: 'Syne', sans-serif;
-        font-weight: 700;
-        font-size: 1.5rem;
-        color: var(--color-accent-primary);
-    }
-
-    .nh-category-stat-label {
-        font-size: 0.8rem;
-        color: var(--color-text-muted);
-    }
-
-    .nh-category-empty {
-        font-family: 'Source Serif 4', serif;
-        font-style: italic;
-    }
-
-    .nh-category-card-actions {
-        padding: var(--space-sm) var(--space-lg) var(--space-md) !important;
-        border-top: 1px solid var(--color-border);
-        display: flex;
-        gap: var(--space-sm);
-    }
-
-    .nh-category-action-btn {
-        font-family: 'Syne', sans-serif !important;
-        font-size: 0.75rem !important;
-        font-weight: 500 !important;
-        color: var(--color-text-muted) !important;
-        text-transform: uppercase !important;
-        letter-spacing: 0.03em !important;
-        display: flex !important;
-        align-items: center !important;
-        gap: 4px !important;
-        padding: 6px 12px !important;
-        border-radius: 4px !important;
-        transition: all 150ms ease !important;
-    }
-
-    .nh-category-action-btn:hover {
-        background: var(--color-bg-secondary) !important;
-        color: var(--color-accent-primary) !important;
-    }
-
-    .nh-category-action-btn .material-icons {
-        font-size: 0.9rem !important;
-    }
-
-    /* Animation */
-    .animate-in {
-        opacity: 0;
-        animation: fadeSlideUp 0.5s ease forwards;
-    }
-
-    @@keyframes fadeSlideUp {
-        from { opacity: 0; transform: translateY(15px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-</style>
+    <div class="category-card-actions">
+        <a href="/categories/@Category.Id" class="btn btn-ghost btn-sm">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+            查看
+        </a>
+        <a href="/categories/@Category.Id/edit" class="btn btn-ghost btn-sm">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+            </svg>
+            编辑
+        </a>
+    </div>
+</div>
 
 @code {
     [Parameter]

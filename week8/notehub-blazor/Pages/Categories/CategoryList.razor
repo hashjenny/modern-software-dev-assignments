@@ -3,28 +3,41 @@
 @inject INoteService NoteService
 @inject IAuthService AuthService
 @inject NavigationManager Navigation
-@using notehub_blazor.Components
 
-
-<MudText Typo="Typo.h4" Color="Color.Primary" Class="mb-4">分类列表</MudText>
-<MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/categories/new" StartIcon="@Icons.Material.Filled.Add">
-    新建分类
-</MudButton>
+<div class="page-header animate-slide-up">
+    <h1 class="page-title">分类列表</h1>
+    <a href="/categories/new" class="btn btn-primary">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        <span>新建分类</span>
+    </a>
+</div>
 
 @if (categories.Any())
 {
-    <MudGrid Class="mt-4">
+    <div class="grid grid-2 animate-slide-up animate-delay-1">
         @foreach (var category in categories)
         {
-            <MudItem xs="12" md="6">
-                <CategoryCard Category="category" NoteCount="@noteCounts.GetValueOrDefault(category.Id, 0)" />
-            </MudItem>
+            <CategoryCard Category="category" NoteCount="@GetNoteCount(category.Id)" />
         }
-    </MudGrid>
+    </div>
 }
 else
 {
-    <MudAlert Severity="Severity.Info" Class="mt-4">暂无分类</MudAlert>
+    <div class="empty-state animate-scale-in">
+        <div class="empty-state-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                <polyline points="22 12 22 19 16 19"></polyline>
+                <line x1="19" y1="16" x2="16" y2="19"></line>
+            </svg>
+        </div>
+        <p class="empty-state-title">暂无分类</p>
+        <p class="empty-state-text">开始创建你的第一个分类吧</p>
+        <a href="/categories/new" class="btn btn-primary">创建分类</a>
+    </div>
 }
 
 @code {
@@ -49,5 +62,8 @@ else
         }
     }
 
-
+    private int GetNoteCount(int categoryId)
+    {
+        return noteCounts.GetValueOrDefault(categoryId, 0);
+    }
 }

@@ -3,39 +3,55 @@
 @inject ICategoryService CategoryService
 @inject IAuthService AuthService
 @inject NavigationManager Navigation
-@using notehub_blazor.Components
 
+<div class="page-header animate-slide-up">
+    <h1 class="page-title">搜索结果</h1>
+</div>
 
-<MudText Typo="Typo.h4" Color="Color.Primary" Class="mb-4">搜索结果</MudText>
+<div class="search-container animate-slide-up animate-delay-1">
+    <div class="search-box">
+        <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input
+            type="text"
+            class="search-input"
+            placeholder="输入搜索关键词"
+            @bind="searchQuery"
+            @onkeydown="@(e => { if (e.Key == "Enter") HandleSearch(); })" />
+        <button class="btn btn-primary search-btn" @onclick="HandleSearch">搜索</button>
+    </div>
+</div>
 
 @if (!string.IsNullOrEmpty(query))
 {
-    <MudText Color="Color.Default" Class="mb-3">搜索: "@query" (@notes.Count() 结果)</MudText>
+    <p class="search-results-count animate-fade-in">
+        搜索 "@query"，@notes.Count 结果
+    </p>
 }
-
-<MudGrid Class="mb-4">
-    <MudItem xs="12" md="6">
-        <MudTextField @bind-Value="searchQuery" Label="搜索笔记" Placeholder="输入搜索关键词" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Search" OnKeyDown="@(e => { if (e.Key == "Enter") HandleSearch(); })" />
-    </MudItem>
-    <MudItem xs="12" md="6" Class="d-flex align-center">
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="HandleSearch">搜索</MudButton>
-    </MudItem>
-</MudGrid>
 
 @if (notes.Any())
 {
-    <MudGrid>
+    <div class="grid grid-2 animate-slide-up animate-delay-2">
         @foreach (var note in notes)
         {
-            <MudItem xs="12" md="6">
-                <NoteCard Note="note" CategoryName="@GetCategoryName(note.CategoryId)" />
-            </MudItem>
+            <NoteCard Note="note" CategoryName="@GetCategoryName(note.CategoryId)" />
         }
-    </MudGrid>
+    </div>
 }
 else if (!string.IsNullOrEmpty(query))
 {
-    <MudAlert Severity="Severity.Info">没有找到匹配的笔记</MudAlert>
+    <div class="empty-state animate-scale-in">
+        <div class="empty-state-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+        </div>
+        <p class="empty-state-title">没有找到匹配的笔记</p>
+        <p class="empty-state-text">尝试其他关键词</p>
+    </div>
 }
 
 @code {
@@ -88,6 +104,4 @@ else if (!string.IsNullOrEmpty(query))
         if (!categoryId.HasValue) return null;
         return categoryNames.GetValueOrDefault(categoryId.Value);
     }
-
-
 }

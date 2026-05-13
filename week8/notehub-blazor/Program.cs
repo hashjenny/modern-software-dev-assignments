@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
-using MudBlazor.Services;
 using notehub_blazor.Data;
 using notehub_blazor.Services;
 
@@ -7,7 +6,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
-builder.Services.AddMudServices();
 
 builder.Services.AddSingleton<LiteDbContext>();
 builder.Services.AddScoped<INoteService, NoteService>();

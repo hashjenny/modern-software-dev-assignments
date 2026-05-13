@@ -4,23 +4,30 @@
 @inject IAuthService AuthService
 @inject NavigationManager Navigation
 
-
-<MudText Typo="Typo.h4" Color="Color.Primary" Class="mb-4">@(Id == 0 ? "新建分类" : "编辑分类")</MudText>
-
-<MudCard>
-    <MudCardContent>
+<div class="card animate-slide-up">
+    <div class="card-header">
+        <h1 class="detail-title">@(Id == 0 ? "新建分类" : "编辑分类")</h1>
+    </div>
+    <div class="card-body">
         <EditForm Model="@category" OnValidSubmit="@HandleSubmit">
-            <DataAnnotationsValidator />
-            <ValidationSummary />
+            <div class="form-group">
+                <label class="form-label">名称</label>
+                <InputText @bind-Value="category.Name" class="form-input" placeholder="请输入分类名称" />
+                <ValidationMessage For="@(() => category.Name)" />
+            </div>
 
-            <MudTextField @bind-Value="category.Name" Label="名称" Required="true" Class="mb-3" />
-            <ValidationMessage For="@(() => category.Name)" />
-
-            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="mr-2">保存</MudButton>
-            <MudButton Variant="Variant.Outlined" Href="/categories">取消</MudButton>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    保存
+                </button>
+                <a href="/categories" class="btn btn-secondary">取消</a>
+            </div>
         </EditForm>
-    </MudCardContent>
-</MudCard>
+    </div>
+</div>
 
 @code {
     [Parameter]
@@ -62,6 +69,4 @@
 
         Navigation.NavigateTo("/categories");
     }
-
-
 }
