@@ -18,7 +18,7 @@
             <p class="auth-subtitle">登录以继续你的笔记之旅</p>
         </div>
 
-        <form @onsubmit="HandleLogin">
+        <form @onsubmit:preventdefault="true" @onsubmit="HandleLogin">
             <div class="form-group">
                 <label class="form-label">用户名</label>
                 <input type="text" class="form-input" placeholder="请输入用户名" @bind="username" />
