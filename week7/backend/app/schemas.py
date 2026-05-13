@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class NoteCreate(BaseModel):
@@ -33,7 +33,7 @@ class NoteRead(BaseModel):
     id: int
     title: str
     content: str
-    tags: list[TagRead] = []
+    tags: list[TagRead] = Field(default_factory=list)
     created_at: datetime
     updated_at: datetime
 
@@ -48,6 +48,10 @@ class NotePatch(BaseModel):
 
 class NoteTagsPatch(BaseModel):
     tag_ids: list[int]
+
+
+class NoteTagLinkCreate(BaseModel):
+    tag_id: int
 
 
 class ActionItemCreate(BaseModel):
