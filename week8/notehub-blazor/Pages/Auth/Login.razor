@@ -3,7 +3,7 @@
 @inject NavigationManager Navigation
 @inject IAuthService AuthService
 
-<div class="auth-container animate-fade-in">
+<div class="auth-page animate-fade-in">
     <div class="auth-card">
         <div class="auth-logo">
             <div class="auth-logo-icon">N</div>
@@ -18,15 +18,15 @@
             <p class="auth-subtitle">登录以继续你的笔记之旅</p>
         </div>
 
-        <EditForm Model="@model" OnValidSubmit="@HandleLogin">
+        <form @onsubmit="HandleLogin">
             <div class="form-group">
                 <label class="form-label">用户名</label>
-                <InputText @bind-Value="model.UserName" class="form-input" placeholder="请输入用户名" />
+                <input type="text" class="form-input" placeholder="请输入用户名" @bind="username" />
             </div>
 
             <div class="form-group">
                 <label class="form-label">密码</label>
-                <InputText @bind-Value="model.Password" type="password" class="form-input" placeholder="请输入密码" />
+                <input type="password" class="form-input" placeholder="请输入密码" @bind="password" />
             </div>
 
             @if (!string.IsNullOrEmpty(errorMessage))
@@ -48,7 +48,7 @@
                 }
                 登录
             </button>
-        </EditForm>
+        </form>
 
         <div class="auth-footer">
             <span>还没有账号？</span>
@@ -64,16 +64,23 @@
 </div>
 
 @code {
-    private LoginModel model = new();
+    private string username = string.Empty;
+    private string password = string.Empty;
     private bool loading;
     private string? errorMessage;
 
     private async Task HandleLogin()
     {
+        if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
+        {
+            errorMessage = "请输入用户名和密码";
+            return;
+        }
+
         errorMessage = null;
         loading = true;
 
-        var result = await AuthService.LoginAsync(model.UserName, model.Password);
+        var result = await AuthService.LoginAsync(username, password);
         if (result)
         {
             Navigation.NavigateTo("/", forceLoad: true);
@@ -84,11 +91,5 @@
         }
 
         loading = false;
-    }
-
-    private class LoginModel
-    {
-        public string UserName { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty;
     }
 }

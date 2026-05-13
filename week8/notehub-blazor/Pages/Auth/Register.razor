@@ -3,7 +3,7 @@
 @inject NavigationManager Navigation
 @inject IAuthService AuthService
 
-<div class="auth-container animate-fade-in">
+<div class="auth-page animate-fade-in">
     <div class="auth-card">
         <div class="auth-logo">
             <div class="auth-logo-icon">N</div>
@@ -18,25 +18,25 @@
             <p class="auth-subtitle">开始你的笔记之旅</p>
         </div>
 
-        <EditForm Model="@model" OnValidSubmit="@HandleRegister">
+        <form @onsubmit="HandleRegister">
             <div class="form-group">
                 <label class="form-label">用户名</label>
-                <InputText @bind-Value="model.UserName" class="form-input" placeholder="请输入用户名" />
+                <input type="text" class="form-input" placeholder="请输入用户名" @bind="username" />
             </div>
 
             <div class="form-group">
                 <label class="form-label">邮箱</label>
-                <InputText @bind-Value="model.Email" type="email" class="form-input" placeholder="请输入邮箱" />
+                <input type="email" class="form-input" placeholder="请输入邮箱" @bind="email" />
             </div>
 
             <div class="form-group">
                 <label class="form-label">密码</label>
-                <InputText @bind-Value="model.Password" type="password" class="form-input" placeholder="请输入密码" />
+                <input type="password" class="form-input" placeholder="请输入密码" @bind="password" />
             </div>
 
             <div class="form-group">
                 <label class="form-label">确认密码</label>
-                <InputText @bind-Value="model.ConfirmPassword" type="password" class="form-input" placeholder="请再次输入密码" />
+                <input type="password" class="form-input" placeholder="请再次输入密码" @bind="confirmPassword" />
             </div>
 
             @if (!string.IsNullOrEmpty(errorMessage))
@@ -58,7 +58,7 @@
                 }
                 注册
             </button>
-        </EditForm>
+        </form>
 
         <div class="auth-footer">
             <span>已有账号？</span>
@@ -74,22 +74,38 @@
 </div>
 
 @code {
-    private RegisterModel model = new();
+    private string username = string.Empty;
+    private string email = string.Empty;
+    private string password = string.Empty;
+    private string confirmPassword = string.Empty;
     private bool loading;
     private string? errorMessage;
 
     private async Task HandleRegister()
     {
-        if (model.Password != model.ConfirmPassword)
+        if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(email) ||
+            string.IsNullOrWhiteSpace(password) || string.IsNullOrWhiteSpace(confirmPassword))
+        {
+            errorMessage = "请填写所有字段";
+            return;
+        }
+
+        if (password != confirmPassword)
         {
             errorMessage = "两次输入的密码不一致";
+            return;
+        }
+
+        if (password.Length < 6)
+        {
+            errorMessage = "密码长度至少为6位";
             return;
         }
 
         errorMessage = null;
         loading = true;
 
-        var result = await AuthService.RegisterAsync(model.UserName, model.Email, model.Password);
+        var result = await AuthService.RegisterAsync(username, email, password);
         if (result)
         {
             Navigation.NavigateTo("/login", forceLoad: true);
@@ -100,13 +116,5 @@
         }
 
         loading = false;
-    }
-
-    private class RegisterModel
-    {
-        public string UserName { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty;
-        public string ConfirmPassword { get; set; } = string.Empty;
     }
 }
