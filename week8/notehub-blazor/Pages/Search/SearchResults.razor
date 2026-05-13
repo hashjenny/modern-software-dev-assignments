@@ -1,0 +1,93 @@
+@page "/search"
+@inject INoteService NoteService
+@inject ICategoryService CategoryService
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+@using notehub_blazor.Components
+
+
+<MudText Typo="Typo.h4" Color="Color.Primary" Class="mb-4">搜索结果</MudText>
+
+@if (!string.IsNullOrEmpty(query))
+{
+    <MudText Color="Color.Default" Class="mb-3">搜索: "@query" (@notes.Count() 结果)</MudText>
+}
+
+<MudGrid Class="mb-4">
+    <MudItem xs="12" md="6">
+        <MudTextField @bind-Value="searchQuery" Label="搜索笔记" Placeholder="输入搜索关键词" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Search" OnKeyDown="@(e => { if (e.Key == "Enter") HandleSearch(); })" />
+    </MudItem>
+    <MudItem xs="12" md="6" Class="d-flex align-center">
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="HandleSearch">搜索</MudButton>
+    </MudItem>
+</MudGrid>
+
+@if (notes.Any())
+{
+    <MudGrid>
+        @foreach (var note in notes)
+        {
+            <MudItem xs="12" md="6">
+                <NoteCard Note="note" CategoryName="@GetCategoryName(note.CategoryId)" />
+            </MudItem>
+        }
+    </MudGrid>
+}
+else if (!string.IsNullOrEmpty(query))
+{
+    <MudAlert Severity="Severity.Info">没有找到匹配的笔记</MudAlert>
+}
+
+@code {
+    private string query = string.Empty;
+    private string searchQuery = string.Empty;
+    private List<Note> notes = new();
+    private Dictionary<int, string> categoryNames = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+        var queryParams = QueryHelpers.ParseQuery(uri.Query);
+        query = queryParams.TryGetValue("q", out var qValue) ? qValue.ToString() : string.Empty;
+        searchQuery = query;
+
+        if (!string.IsNullOrEmpty(query))
+        {
+            await SearchAsync();
+        }
+    }
+
+    private async Task SearchAsync()
+    {
+        var userId = await AuthService.GetUserIdAsync();
+        if (string.IsNullOrEmpty(userId))
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        notes = (await NoteService.SearchAsync(query, userId)).ToList();
+
+        var categories = await CategoryService.GetAllAsync(userId);
+        foreach (var category in categories)
+        {
+            categoryNames[category.Id] = category.Name;
+        }
+    }
+
+    private void HandleSearch()
+    {
+        if (!string.IsNullOrWhiteSpace(searchQuery))
+        {
+            Navigation.NavigateTo($"/search?q={Uri.EscapeDataString(searchQuery)}");
+        }
+    }
+
+    private string? GetCategoryName(int? categoryId)
+    {
+        if (!categoryId.HasValue) return null;
+        return categoryNames.GetValueOrDefault(categoryId.Value);
+    }
+
+
+}

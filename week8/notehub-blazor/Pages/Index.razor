@@ -1,0 +1,483 @@
+@page "/"
+@inject INoteService NoteService
+@inject ICategoryService CategoryService
+@inject IAuthService AuthService
+
+<div class="nh-home">
+    <header class="nh-hero animate-in">
+        <div class="nh-hero-badge">
+            <span class="material-icons">auto_awesome</span>
+            <span>你的个人笔记中心</span>
+        </div>
+        <h1 class="nh-hero-title">NoteHub</h1>
+        <p class="nh-hero-subtitle">记录思考，整理知识，让灵感有序流淌</p>
+
+        @if (!isLoggedIn)
+        {
+            <div class="nh-hero-actions">
+                <MudButton Variant="Variant.Filled" Href="/register" Class="nh-hero-btn-primary">
+                    <span>开始使用</span>
+                    <span class="material-icons">arrow_forward</span>
+                </MudButton>
+                <MudButton Variant="Variant.Outlined" Href="/login" Class="nh-hero-btn-secondary">
+                    登录
+                </MudButton>
+            </div>
+        }
+    </header>
+
+    @if (isLoggedIn)
+    {
+        <section class="nh-section animate-in-delay-2">
+            <div class="nh-section-header">
+                <div class="nh-section-title-wrap">
+                    <span class="material-icons">schedule</span>
+                    <h2 class="nh-section-title">最近笔记</h2>
+                </div>
+                @if (recentNotes.Any())
+                {
+                    <MudButton Variant="Variant.Text" Href="/notes" Class="nh-section-link">
+                        查看全部
+                        <span class="material-icons">chevron_right</span>
+                    </MudButton>
+                }
+            </div>
+
+            @if (recentNotes.Any())
+            {
+                <div class="nh-grid nh-grid-2">
+                    @foreach (var note in recentNotes)
+                    {
+                        <NoteCard Note="note" CategoryName="@GetCategoryName(note.CategoryId)" />
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="nh-empty-state">
+                    <div class="nh-empty-icon">
+                        <span class="material-icons">note_add</span>
+                    </div>
+                    <p class="nh-empty-text">还没有笔记</p>
+                    <MudButton Variant="Variant.Outlined" Href="/notes/new" Class="nh-empty-btn">
+                        <span class="material-icons">add</span>
+                        创建第一条笔记
+                    </MudButton>
+                </div>
+            }
+        </section>
+
+        <section class="nh-section animate-in-delay-3">
+            <div class="nh-section-header">
+                <div class="nh-section-title-wrap">
+                    <span class="material-icons">folder</span>
+                    <h2 class="nh-section-title">分类</h2>
+                </div>
+                @if (recentCategories.Any())
+                {
+                    <MudButton Variant="Variant.Text" Href="/categories" Class="nh-section-link">
+                        查看全部
+                        <span class="material-icons">chevron_right</span>
+                    </MudButton>
+                }
+            </div>
+
+            @if (recentCategories.Any())
+            {
+                <div class="nh-grid nh-grid-3">
+                    @foreach (var category in recentCategories)
+                    {
+                        <CategoryCard Category="category" NoteCount="@GetNoteCount(category.Id)" />
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="nh-empty-state">
+                    <div class="nh-empty-icon">
+                        <span class="material-icons">create_new_folder</span>
+                    </div>
+                    <p class="nh-empty-text">还没有分类</p>
+                    <MudButton Variant="Variant.Outlined" Href="/categories/new" Class="nh-empty-btn">
+                        <span class="material-icons">add</span>
+                        创建分类
+                    </MudButton>
+                </div>
+            }
+        </section>
+    }
+    else
+    {
+        <section class="nh-section animate-in-delay-2">
+            <div class="nh-features">
+                <div class="nh-feature">
+                    <div class="nh-feature-icon">
+                        <span class="material-icons">edit_note</span>
+                    </div>
+                    <h3 class="nh-feature-title">简洁编辑</h3>
+                    <p class="nh-feature-desc">支持 Markdown 格式，让你的笔记更加美观</p>
+                </div>
+                <div class="nh-feature">
+                    <div class="nh-feature-icon">
+                        <span class="material-icons">folder_special</span>
+                    </div>
+                    <h3 class="nh-feature-title">分类整理</h3>
+                    <p class="nh-feature-desc">多种分类方式，让知识结构清晰明了</p>
+                </div>
+                <div class="nh-feature">
+                    <div class="nh-feature-icon">
+                        <span class="material-icons">search</span>
+                    </div>
+                    <h3 class="nh-feature-title">快速搜索</h3>
+                    <p class="nh-feature-desc">一键搜索，快速找到所需内容</p>
+                </div>
+            </div>
+        </section>
+    }
+</div>
+
+<style>
+    .nh-home {
+        padding-bottom: var(--space-3xl);
+    }
+
+    /* Hero Section */
+    .nh-hero {
+        text-align: center;
+        padding: var(--space-3xl) 0;
+        position: relative;
+    }
+
+    .nh-hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80px;
+        height: 4px;
+        background: linear-gradient(90deg, var(--color-accent-secondary), var(--color-accent-primary), var(--color-accent-secondary));
+        border-radius: 2px;
+    }
+
+    .nh-hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        background: rgba(196, 93, 53, 0.08);
+        border-radius: 20px;
+        font-family: 'Syne', sans-serif;
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: var(--color-accent-primary);
+        margin-bottom: var(--space-lg);
+    }
+
+    .nh-hero-badge .material-icons {
+        font-size: 0.9rem;
+    }
+
+    .nh-hero-title {
+        font-family: 'Syne', sans-serif;
+        font-size: 3.5rem;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        color: var(--color-text-primary);
+        margin: 0 0 var(--space-md);
+        line-height: 1.1;
+    }
+
+    .nh-hero-subtitle {
+        font-family: 'Source Serif 4', serif;
+        font-size: 1.25rem;
+        color: var(--color-text-muted);
+        max-width: 400px;
+        margin: 0 auto var(--space-xl);
+    }
+
+    .nh-hero-actions {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--space-md);
+    }
+
+    .nh-hero-btn-primary {
+        font-family: 'Syne', sans-serif !important;
+        font-weight: 600 !important;
+        font-size: 0.85rem !important;
+        letter-spacing: 0.05em !important;
+        text-transform: uppercase !important;
+        background: var(--color-accent-primary) !important;
+        color: white !important;
+        border-radius: 4px !important;
+        padding: 14px 28px !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        transition: all 150ms ease !important;
+    }
+
+    .nh-hero-btn-primary:hover {
+        background: #A84D2B !important;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(196, 93, 53, 0.3);
+    }
+
+    .nh-hero-btn-primary .material-icons {
+        font-size: 1rem;
+    }
+
+    .nh-hero-btn-secondary {
+        font-family: 'Syne', sans-serif !important;
+        font-weight: 600 !important;
+        font-size: 0.85rem !important;
+        letter-spacing: 0.05em !important;
+        text-transform: uppercase !important;
+        border: 1px solid var(--color-border-strong) !important;
+        border-radius: 4px !important;
+        padding: 14px 28px !important;
+        color: var(--color-text-primary) !important;
+        transition: all 150ms ease !important;
+    }
+
+    .nh-hero-btn-secondary:hover {
+        background: var(--color-bg-secondary) !important;
+        border-color: var(--color-text-muted) !important;
+    }
+
+    /* Section */
+    .nh-section {
+        margin-top: var(--space-3xl);
+    }
+
+    .nh-section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: var(--space-xl);
+        padding-bottom: var(--space-md);
+        border-bottom: 1px solid var(--color-border);
+    }
+
+    .nh-section-title-wrap {
+        display: flex;
+        align-items: center;
+        gap: var(--space-sm);
+    }
+
+    .nh-section-title-wrap .material-icons {
+        font-size: 1.25rem;
+        color: var(--color-accent-primary);
+    }
+
+    .nh-section-title {
+        font-family: 'Syne', sans-serif;
+        font-weight: 700;
+        font-size: 1.25rem;
+        color: var(--color-text-primary);
+        margin: 0;
+    }
+
+    .nh-section-link {
+        font-family: 'Syne', sans-serif !important;
+        font-size: 0.8rem !important;
+        font-weight: 500 !important;
+        color: var(--color-text-muted) !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 2px !important;
+        transition: color 150ms ease !important;
+    }
+
+    .nh-section-link:hover {
+        color: var(--color-accent-primary) !important;
+    }
+
+    .nh-section-link .material-icons {
+        font-size: 1.1rem;
+    }
+
+    /* Grid */
+    .nh-grid {
+        display: grid;
+        gap: var(--space-lg);
+    }
+
+    .nh-grid-2 { grid-template-columns: repeat(2, 1fr); }
+    .nh-grid-3 { grid-template-columns: repeat(3, 1fr); }
+
+    @@media (max-width: 900px) {
+        .nh-grid-2, .nh-grid-3 { grid-template-columns: 1fr; }
+    }
+
+    /* Empty State */
+    .nh-empty-state {
+        text-align: center;
+        padding: var(--space-3xl) var(--space-xl);
+        background: var(--color-bg-paper);
+        border: 1px dashed var(--color-border-strong);
+        border-radius: 4px;
+    }
+
+    .nh-empty-icon {
+        width: 64px;
+        height: 64px;
+        background: var(--color-bg-secondary);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto var(--space-lg);
+    }
+
+    .nh-empty-icon .material-icons {
+        font-size: 2rem;
+        color: var(--color-text-muted);
+    }
+
+    .nh-empty-text {
+        font-family: 'Source Serif 4', serif;
+        font-size: 1.1rem;
+        color: var(--color-text-muted);
+        margin: 0 0 var(--space-lg);
+    }
+
+    .nh-empty-btn {
+        font-family: 'Syne', sans-serif !important;
+        font-weight: 500 !important;
+        font-size: 0.8rem !important;
+        letter-spacing: 0.03em !important;
+        border: 1px solid var(--color-border-strong) !important;
+        border-radius: 4px !important;
+        padding: 10px 20px !important;
+        color: var(--color-text-primary) !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        transition: all 150ms ease !important;
+    }
+
+    .nh-empty-btn:hover {
+        background: var(--color-accent-primary) !important;
+        border-color: var(--color-accent-primary) !important;
+        color: white !important;
+    }
+
+    .nh-empty-btn .material-icons {
+        font-size: 1rem;
+    }
+
+    /* Features */
+    .nh-features {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--space-xl);
+    }
+
+    @@media (max-width: 768px) {
+        .nh-features { grid-template-columns: 1fr; }
+    }
+
+    .nh-feature {
+        text-align: center;
+        padding: var(--space-xl);
+        background: var(--color-bg-paper);
+        border: 1px solid var(--color-border);
+        border-radius: 4px;
+        transition: all 200ms ease;
+    }
+
+    .nh-feature:hover {
+        border-color: var(--color-border-strong);
+        box-shadow: 0 4px 16px var(--color-shadow);
+        transform: translateY(-2px);
+    }
+
+    .nh-feature-icon {
+        width: 56px;
+        height: 56px;
+        background: linear-gradient(135deg, rgba(196, 93, 53, 0.1), rgba(232, 168, 112, 0.1));
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto var(--space-lg);
+    }
+
+    .nh-feature-icon .material-icons {
+        font-size: 1.5rem;
+        color: var(--color-accent-primary);
+    }
+
+    .nh-feature-title {
+        font-family: 'Syne', sans-serif;
+        font-weight: 700;
+        font-size: 1rem;
+        color: var(--color-text-primary);
+        margin: 0 0 var(--space-sm);
+    }
+
+    .nh-feature-desc {
+        font-family: 'Source Serif 4', serif;
+        font-size: 0.9rem;
+        color: var(--color-text-muted);
+        margin: 0;
+        line-height: 1.5;
+    }
+
+    /* Animations */
+    .animate-in {
+        animation: fadeSlideUp 0.6s ease forwards;
+    }
+
+    .animate-in-delay-1 { animation-delay: 0.1s; opacity: 0; }
+    .animate-in-delay-2 { animation-delay: 0.2s; opacity: 0; }
+    .animate-in-delay-3 { animation-delay: 0.3s; opacity: 0; }
+    .animate-in-delay-4 { animation-delay: 0.4s; opacity: 0; }
+
+    @@keyframes fadeSlideUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+@code {
+    private List<Note> recentNotes = new();
+    private List<Category> recentCategories = new();
+    private Dictionary<int, string> categoryNames = new();
+    private bool isLoggedIn;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var userId = await AuthService.GetUserIdAsync();
+        isLoggedIn = !string.IsNullOrEmpty(userId);
+
+        if (!isLoggedIn) return;
+
+        recentNotes = (await NoteService.GetAllAsync(userId!))
+            .OrderByDescending(n => n.CreatedAt)
+            .Take(4)
+            .ToList();
+
+        recentCategories = (await CategoryService.GetAllAsync(userId!))
+            .ToList();
+
+        foreach (var category in recentCategories)
+        {
+            categoryNames[category.Id] = category.Name;
+        }
+    }
+
+    private string? GetCategoryName(int? categoryId)
+    {
+        if (!categoryId.HasValue) return null;
+        return categoryNames.GetValueOrDefault(categoryId.Value);
+    }
+
+    private int GetNoteCount(int categoryId)
+    {
+        return recentNotes.Count(n => n.CategoryId == categoryId);
+    }
+}

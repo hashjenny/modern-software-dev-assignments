@@ -1,0 +1,286 @@
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+
+@inherits LayoutComponentBase
+
+<MudLayout>
+    <MudAppBar Elevation="0" Class="nh-appbar">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Default" Edge="Edge.Start" OnClick="@ToggleDrawer" Class="nh-menu-btn" />
+        <MudText Typo="Typo.h5" Class="nh-brand">
+            <span class="nh-brand-icon">N</span>oteHub
+        </MudText>
+        <MudSpacer />
+        @if (isLoggedIn)
+        {
+            <div class="nh-user-info animate-in-delay-1">
+                <div class="nh-user-avatar">@GetUserInitial()</div>
+                <MudChip T="string" Class="nh-user-chip">@userName</MudChip>
+                <MudButton Variant="Variant.Text" Color="Color.Default" OnClick="HandleLogout" Class="nh-btn-text">登出</MudButton>
+            </div>
+        }
+        else
+        {
+            <MudButton Variant="Variant.Text" Href="/login" Class="nh-btn-text animate-in-delay-1">登录</MudButton>
+            <MudButton Variant="Variant.Outlined" Href="/register" Class="nh-btn-outline animate-in-delay-2">注册</MudButton>
+        }
+    </MudAppBar>
+
+    <MudDrawer @bind-Open="_drawerOpen" Elevation="0" Variant="DrawerVariant.Mini" ClipMode="DrawerClipMode.Always" Class="nh-drawer">
+        <MudNavMenu Class="nh-nav-menu">
+            <MudText Typo="Typo.h6" Class="nh-nav-header">导航</MudText>
+            <MudDivider Class="nh-nav-divider" />
+            <MudNavLink Href="/" Match="NavLinkMatch.All" Class="@GetNavClass("/")">
+                <div class="nh-nav-icon-wrap">
+                    <span class="material-icons">home</span>
+                </div>
+                <span class="nh-nav-text">首页</span>
+            </MudNavLink>
+            <MudNavLink Href="/notes" Match="NavLinkMatch.Prefix" Class="@GetNavClass("/notes")">
+                <div class="nh-nav-icon-wrap">
+                    <span class="material-icons">article</span>
+                </div>
+                <span class="nh-nav-text">笔记</span>
+            </MudNavLink>
+            <MudNavLink Href="/categories" Match="NavLinkMatch.Prefix" Class="@GetNavClass("/categories")">
+                <div class="nh-nav-icon-wrap">
+                    <span class="material-icons">folder</span>
+                </div>
+                <span class="nh-nav-text">分类</span>
+            </MudNavLink>
+            <MudNavLink Href="/search" Match="NavLinkMatch.Prefix" Class="@GetNavClass("/search")">
+                <div class="nh-nav-icon-wrap">
+                    <span class="material-icons">search</span>
+                </div>
+                <span class="nh-nav-text">搜索</span>
+            </MudNavLink>
+        </MudNavMenu>
+    </MudDrawer>
+
+    <MudMainContent Class="nh-main-content">
+        <div class="nh-page-container">
+            @Body
+        </div>
+    </MudMainContent>
+</MudLayout>
+
+<style>
+    /* App Bar */
+    .nh-appbar {
+        background: var(--color-bg-paper) !important;
+        border-bottom: 1px solid var(--color-border);
+        padding: 0 var(--space-lg);
+        height: 64px;
+    }
+
+    .nh-menu-btn {
+        color: var(--color-text-secondary) !important;
+    }
+
+    .nh-brand {
+        font-family: 'Syne', sans-serif !important;
+        font-weight: 800 !important;
+        font-size: 1.5rem !important;
+        color: var(--color-text-primary) !important;
+        letter-spacing: -0.02em;
+    }
+
+    .nh-brand-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        background: var(--color-accent-primary);
+        color: white;
+        font-size: 1rem;
+        border-radius: 4px;
+        margin-right: 8px;
+    }
+
+    .nh-user-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .nh-user-avatar {
+        width: 32px;
+        height: 32px;
+        background: linear-gradient(135deg, var(--color-accent-primary), var(--color-accent-secondary));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-family: 'Syne', sans-serif;
+        font-weight: 700;
+        font-size: 0.85rem;
+    }
+
+    .nh-user-chip {
+        background: var(--color-bg-secondary) !important;
+        color: var(--color-text-secondary) !important;
+        font-family: 'Syne', sans-serif !important;
+        font-size: 0.75rem !important;
+        font-weight: 500 !important;
+    }
+
+    .nh-btn-text {
+        font-family: 'Syne', sans-serif !important;
+        font-weight: 500 !important;
+        font-size: 0.8rem !important;
+        letter-spacing: 0.02em !important;
+        color: var(--color-text-secondary) !important;
+    }
+
+    .nh-btn-text:hover {
+        color: var(--color-accent-primary) !important;
+    }
+
+    .nh-btn-outline {
+        font-family: 'Syne', sans-serif !important;
+        font-weight: 600 !important;
+        font-size: 0.75rem !important;
+        letter-spacing: 0.05em !important;
+        text-transform: uppercase !important;
+        border: 1px solid var(--color-border-strong) !important;
+        border-radius: 2px !important;
+        padding: 8px 16px !important;
+        color: var(--color-text-primary) !important;
+        transition: all 150ms ease !important;
+    }
+
+    .nh-btn-outline:hover {
+        background: var(--color-accent-primary) !important;
+        border-color: var(--color-accent-primary) !important;
+        color: white !important;
+    }
+
+    /* Drawer */
+    .nh-drawer {
+        background: var(--color-bg-paper) !important;
+        border-right: 1px solid var(--color-border);
+        width: 220px !important;
+    }
+
+    .nh-nav-menu {
+        padding: var(--space-lg) var(--space-md);
+    }
+
+    .nh-nav-header {
+        font-family: 'Syne', sans-serif !important;
+        font-weight: 700 !important;
+        font-size: 0.7rem !important;
+        letter-spacing: 0.1em !important;
+        text-transform: uppercase !important;
+        color: var(--color-text-muted) !important;
+        padding: var(--space-sm) var(--space-md) !important;
+    }
+
+    .nh-nav-divider {
+        border-color: var(--color-border) !important;
+        margin: var(--space-sm) 0 var(--space-md) !important;
+    }
+
+    .mud-nav-link {
+        border-radius: 4px !important;
+        margin: 4px 0 !important;
+        transition: all 150ms ease !important;
+    }
+
+    .mud-nav-link:hover {
+        background: var(--color-bg-secondary) !important;
+    }
+
+    .mud-nav-link.active {
+        background: rgba(196, 93, 53, 0.08) !important;
+    }
+
+    .mud-nav-link .material-icons {
+        font-size: 1.25rem !important;
+        color: var(--color-text-muted) !important;
+        transition: color 150ms ease !important;
+    }
+
+    .mud-nav-link.active .material-icons,
+    .mud-nav-link:hover .material-icons {
+        color: var(--color-accent-primary) !important;
+    }
+
+    .mud-nav-link span:not(.material-icons) {
+        font-family: 'Syne', sans-serif !important;
+        font-weight: 500 !important;
+        font-size: 0.85rem !important;
+        color: var(--color-text-secondary) !important;
+    }
+
+    .mud-nav-link.active span:not(.material-icons) {
+        color: var(--color-accent-primary) !important;
+        font-weight: 600 !important;
+    }
+
+    /* Main Content */
+    .nh-main-content {
+        background: var(--color-bg-primary);
+        min-height: calc(100vh - 64px);
+    }
+
+    .nh-page-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: var(--space-xl) var(--space-lg);
+    }
+
+    /* Animations */
+    .animate-in {
+        animation: fadeSlideUp 0.5s ease forwards;
+    }
+
+    .animate-in-delay-1 { animation-delay: 0.1s; opacity: 0; }
+    .animate-in-delay-2 { animation-delay: 0.2s; opacity: 0; }
+    .animate-in-delay-3 { animation-delay: 0.3s; opacity: 0; }
+
+    @@keyframes fadeSlideUp {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+@code {
+    private bool _drawerOpen = true;
+    private bool isLoggedIn;
+    private string? userName;
+
+    protected override async Task OnInitializedAsync()
+    {
+        userName = await AuthService.GetUserNameAsync();
+        isLoggedIn = !string.IsNullOrEmpty(userName);
+    }
+
+    private void ToggleDrawer()
+    {
+        _drawerOpen = !_drawerOpen;
+    }
+
+    private async Task HandleLogout()
+    {
+        await AuthService.LogoutAsync();
+        Navigation.NavigateTo("/", forceLoad: true);
+    }
+
+    private string GetUserInitial()
+    {
+        if (string.IsNullOrEmpty(userName)) return "?";
+        return userName.First().ToString().ToUpper();
+    }
+
+    private string GetNavClass(string href)
+    {
+        var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+        var path = uri.PathAndQuery;
+
+        if (href == "/" && path == "/") return "mud-nav-link active";
+        if (href != "/" && path.StartsWith(href, StringComparison.OrdinalIgnoreCase)) return "mud-nav-link active";
+        return "mud-nav-link";
+    }
+}

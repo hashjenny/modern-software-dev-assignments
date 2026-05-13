@@ -1,0 +1,82 @@
+@page "/notes/new"
+@page "/notes/{Id:int}/edit"
+@inject INoteService NoteService
+@inject ICategoryService CategoryService
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+
+
+<MudText Typo="Typo.h4" Color="Color.Primary" Class="mb-4">@(Id == 0 ? "新建笔记" : "编辑笔记")</MudText>
+
+<MudCard>
+    <MudCardContent>
+        <EditForm Model="@note" OnValidSubmit="@HandleSubmit">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <MudTextField @bind-Value="note.Title" Label="标题" Required="true" Class="mb-3" />
+            <ValidationMessage For="@(() => note.Title)" />
+
+            <MudSelect @bind-Value="note.CategoryId" Label="分类" Class="mb-3">
+                <MudSelectItem Value="(int?)null">无</MudSelectItem>
+                @foreach (var category in categories)
+                {
+                    <MudSelectItem Value="@category.Id">@category.Name</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudTextField @bind-Value="note.Content" Label="内容" Required="true" Lines="10" Class="mb-3" />
+            <ValidationMessage For="@(() => note.Content)" />
+
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="mr-2">保存</MudButton>
+            <MudButton Variant="Variant.Outlined" Href="/notes">取消</MudButton>
+        </EditForm>
+    </MudCardContent>
+</MudCard>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private Note note = new();
+    private List<Category> categories = new();
+    private bool isNew => Id == 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var userId = await AuthService.GetUserIdAsync();
+        if (string.IsNullOrEmpty(userId))
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        categories = (await CategoryService.GetAllAsync(userId)).ToList();
+
+        if (!isNew)
+        {
+            note = await NoteService.GetByIdAsync(Id, userId) ?? new Note();
+        }
+
+        note.UserId = userId;
+    }
+
+    private async Task HandleSubmit()
+    {
+        var userId = await AuthService.GetUserIdAsync();
+        if (string.IsNullOrEmpty(userId)) return;
+
+        if (isNew)
+        {
+            await NoteService.CreateAsync(note);
+        }
+        else
+        {
+            await NoteService.UpdateAsync(note);
+        }
+
+        Navigation.NavigateTo("/notes");
+    }
+
+
+}

@@ -1,0 +1,61 @@
+@page "/notes"
+@inject INoteService NoteService
+@inject IAuthService AuthService
+@inject ICategoryService CategoryService
+@inject NavigationManager Navigation
+@using notehub_blazor.Components
+
+
+<MudText Typo="Typo.h4" Color="Color.Primary" Class="mb-4">笔记列表</MudText>
+<MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/notes/new" StartIcon="@Icons.Material.Filled.Add">
+    新建笔记
+</MudButton>
+
+@if (notes.Any())
+{
+    <MudGrid Class="mt-4">
+        @foreach (var note in notes)
+        {
+            <MudItem xs="12" md="6">
+                <NoteCard Note="note" CategoryName="@GetCategoryName(note.CategoryId)" />
+            </MudItem>
+        }
+    </MudGrid>
+}
+else
+{
+    <MudAlert Severity="Severity.Info" Class="mt-4">
+        暂无笔记，<MudLink Href="/notes/new" Color="Color.Primary">创建第一条笔记</MudLink>
+    </MudAlert>
+}
+
+@code {
+    private List<Note> notes = new();
+    private Dictionary<int, string> categoryNames = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var userId = await AuthService.GetUserIdAsync();
+        if (string.IsNullOrEmpty(userId))
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        notes = (await NoteService.GetAllAsync(userId))
+            .OrderByDescending(n => n.CreatedAt)
+            .ToList();
+
+        var categories = await CategoryService.GetAllAsync(userId);
+        foreach (var category in categories)
+        {
+            categoryNames[category.Id] = category.Name;
+        }
+    }
+
+    private string? GetCategoryName(int? categoryId)
+    {
+        if (!categoryId.HasValue) return null;
+        return categoryNames.GetValueOrDefault(categoryId.Value);
+    }
+}

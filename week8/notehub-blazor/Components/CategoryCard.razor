@@ -1,0 +1,204 @@
+@using notehub_blazor.Models
+
+<MudCard Class="nh-category-card animate-in" Elevation="0">
+    <div class="nh-category-card-accent"></div>
+    <MudCardHeader Class="nh-category-card-header">
+        <CardHeaderContent>
+            <div class="nh-category-icon-wrap">
+                <span class="material-icons">folder</span>
+            </div>
+            <MudText Typo="Typo.h6" Class="nh-category-name">@Category.Name</MudText>
+            <div class="nh-category-meta">
+                <span class="material-icons">schedule</span>
+                <span>@Category.CreatedAt.ToString("yyyy-MM-dd")</span>
+            </div>
+        </CardHeaderContent>
+    </MudCardHeader>
+    <MudCardContent Class="nh-category-card-content">
+        @if (NoteCount.HasValue && NoteCount > 0)
+        {
+            <div class="nh-category-stats">
+                <div class="nh-category-stat">
+                    <span class="nh-category-stat-value">@NoteCount</span>
+                    <span class="nh-category-stat-label">篇笔记</span>
+                </div>
+            </div>
+        }
+        else
+        {
+            <MudText Typo="Typo.body2" Color="Color.Default" Class="nh-category-empty">
+                暂无笔记
+            </MudText>
+        }
+    </MudCardContent>
+    <MudCardActions Class="nh-category-card-actions">
+        <MudButton Variant="Variant.Text" Color="Color.Default" Size="Size.Small" Href="@($"/categories/{Category.Id}")" Class="nh-category-action-btn">
+            <span class="material-icons">visibility</span>
+            <span>查看</span>
+        </MudButton>
+        <MudButton Variant="Variant.Text" Color="Color.Default" Size="Size.Small" Href="@($"/categories/{Category.Id}/edit")" Class="nh-category-action-btn">
+            <span class="material-icons">edit</span>
+            <span>编辑</span>
+        </MudButton>
+    </MudCardActions>
+</MudCard>
+
+<style>
+    .nh-category-card {
+        background: var(--color-bg-paper);
+        border: 1px solid var(--color-border);
+        border-radius: 4px;
+        transition: all 200ms ease;
+        position: relative;
+        overflow: hidden;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .nh-category-card:hover {
+        border-color: var(--color-border-strong);
+        box-shadow: 0 8px 24px var(--color-shadow-strong);
+        transform: translateY(-4px);
+    }
+
+    .nh-category-card:hover .nh-category-card-accent {
+        opacity: 1;
+    }
+
+    .nh-category-card-accent {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: linear-gradient(180deg, var(--color-accent-secondary), var(--color-accent-gold));
+        opacity: 0;
+        transition: opacity 200ms ease;
+    }
+
+    .nh-category-card-header {
+        padding: var(--space-lg) !important;
+    }
+
+    .nh-category-icon-wrap {
+        width: 40px;
+        height: 40px;
+        background: var(--color-bg-secondary);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: var(--space-md);
+    }
+
+    .nh-category-icon-wrap .material-icons {
+        font-size: 1.25rem;
+        color: var(--color-accent-secondary);
+    }
+
+    .nh-category-name {
+        font-family: 'Syne', sans-serif !important;
+        font-weight: 700 !important;
+        font-size: 1.1rem !important;
+        color: var(--color-text-primary) !important;
+        margin-bottom: var(--space-xs) !important;
+    }
+
+    .nh-category-meta {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        color: var(--color-text-muted);
+        font-size: 0.75rem;
+    }
+
+    .nh-category-meta .material-icons {
+        font-size: 0.85rem;
+        color: var(--color-text-muted);
+    }
+
+    .nh-category-card-content {
+        padding: 0 var(--space-lg) var(--space-md) !important;
+        flex: 1;
+    }
+
+    .nh-category-stats {
+        display: flex;
+        align-items: baseline;
+        gap: 4px;
+    }
+
+    .nh-category-stat {
+        display: flex;
+        align-items: baseline;
+        gap: 4px;
+    }
+
+    .nh-category-stat-value {
+        font-family: 'Syne', sans-serif;
+        font-weight: 700;
+        font-size: 1.5rem;
+        color: var(--color-accent-primary);
+    }
+
+    .nh-category-stat-label {
+        font-size: 0.8rem;
+        color: var(--color-text-muted);
+    }
+
+    .nh-category-empty {
+        font-family: 'Source Serif 4', serif;
+        font-style: italic;
+    }
+
+    .nh-category-card-actions {
+        padding: var(--space-sm) var(--space-lg) var(--space-md) !important;
+        border-top: 1px solid var(--color-border);
+        display: flex;
+        gap: var(--space-sm);
+    }
+
+    .nh-category-action-btn {
+        font-family: 'Syne', sans-serif !important;
+        font-size: 0.75rem !important;
+        font-weight: 500 !important;
+        color: var(--color-text-muted) !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.03em !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 4px !important;
+        padding: 6px 12px !important;
+        border-radius: 4px !important;
+        transition: all 150ms ease !important;
+    }
+
+    .nh-category-action-btn:hover {
+        background: var(--color-bg-secondary) !important;
+        color: var(--color-accent-primary) !important;
+    }
+
+    .nh-category-action-btn .material-icons {
+        font-size: 0.9rem !important;
+    }
+
+    /* Animation */
+    .animate-in {
+        opacity: 0;
+        animation: fadeSlideUp 0.5s ease forwards;
+    }
+
+    @@keyframes fadeSlideUp {
+        from { opacity: 0; transform: translateY(15px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+@code {
+    [Parameter]
+    public Category Category { get; set; } = null!;
+
+    [Parameter]
+    public int? NoteCount { get; set; }
+}

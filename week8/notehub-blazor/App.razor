@@ -1,0 +1,17 @@
+<CascadingAuthenticationState>
+    <Router AppAssembly="@typeof(App).Assembly">
+        <Found Context="routeData">
+            <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+        </Found>
+        <NotFound>
+            <PageTitle>Not found</PageTitle>
+            <LayoutView Layout="@typeof(MainLayout)">
+                <MudContainer MaxWidth="MaxWidth.Small" Class="mt-8">
+                    <MudText Typo="Typo.h4" Color="Color.Default">404 - 页面未找到</MudText>
+                    <MudText Color="Color.Default" Class="mt-2">抱歉，这个页面不存在。</MudText>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/" Class="mt-4">返回首页</MudButton>
+                </MudContainer>
+            </LayoutView>
+        </NotFound>
+    </Router>
+</CascadingAuthenticationState>

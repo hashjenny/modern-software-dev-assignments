@@ -1,0 +1,71 @@
+@page "/notes/{Id:int}"
+@inject INoteService NoteService
+@inject ICategoryService CategoryService
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+@using notehub_blazor.Components
+
+
+@if (note != null)
+{
+    <MudCard Class="mb-4">
+        <MudCardHeader>
+            <CardHeaderContent>
+                <MudText Typo="Typo.h5">@note.Title</MudText>
+            </CardHeaderContent>
+            <CardHeaderActions>
+                <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="@(() => Navigation.NavigateTo($"/notes/{note.Id}/edit"))" Class="mr-2">编辑</MudButton>
+                <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="@(() => Navigation.NavigateTo($"/notes/{note.Id}/delete"))">删除</MudButton>
+            </CardHeaderActions>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudText Typo="Typo.body2" Color="Color.Default" Class="mb-2">
+                <small>
+                    创建于: @note.CreatedAt.ToString("yyyy-MM-dd HH:mm")
+                    @if (note.UpdatedAt != note.CreatedAt)
+                    {
+                        <span> | 更新于: @note.UpdatedAt.ToString("yyyy-MM-dd HH:mm")</span>
+                    }
+                </small>
+            </MudText>
+            @if (category != null)
+            {
+                <MudChip T="string" Color="Color.Info" Size="Size.Small">@category.Name</MudChip>
+            }
+            <MudDivider Class="my-3" />
+            <MudText Typo="Typo.body1">@((MarkupString)note.Content.Replace("\n", "<br />"))</MudText>
+        </MudCardContent>
+    </MudCard>
+    <MudButton Variant="Variant.Outlined" Href="/notes">返回列表</MudButton>
+}
+else
+{
+    <MudAlert Severity="Severity.Error">笔记不存在</MudAlert>
+    <MudButton Variant="Variant.Outlined" Href="/notes" Class="mt-2">返回列表</MudButton>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private Note? note;
+    private Category? category;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var userId = await AuthService.GetUserIdAsync();
+        if (string.IsNullOrEmpty(userId))
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        note = await NoteService.GetByIdAsync(Id, userId);
+        if (note?.CategoryId.HasValue == true)
+        {
+            category = await CategoryService.GetByIdAsync(note.CategoryId.Value, userId);
+        }
+    }
+
+
+}

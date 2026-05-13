@@ -1,0 +1,76 @@
+@page "/categories/{Id:int}"
+@inject ICategoryService CategoryService
+@inject IAuthService AuthService
+@inject INoteService NoteService
+@inject NavigationManager Navigation
+@using notehub_blazor.Components
+
+
+@if (category != null)
+{
+    <MudCard Class="mb-4">
+        <MudCardHeader>
+            <CardHeaderContent>
+                <MudText Typo="Typo.h5">@category.Name</MudText>
+            </CardHeaderContent>
+            <CardHeaderActions>
+                <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="@(() => Navigation.NavigateTo($"/categories/{Id}/edit"))" Class="mr-2">编辑</MudButton>
+                <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="@(() => Navigation.NavigateTo($"/categories/{Id}/delete"))">删除</MudButton>
+            </CardHeaderActions>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudText Typo="Typo.body2" Color="Color.Default" Class="mb-2">
+                <small>创建于: @category.CreatedAt.ToString("yyyy-MM-dd HH:mm")</small>
+            </MudText>
+            <MudChip T="string" Color="Color.Info" Size="Size.Small">@notes.Count() 笔记</MudChip>
+        </MudCardContent>
+    </MudCard>
+
+    @if (notes.Any())
+    {
+        <MudGrid>
+            @foreach (var note in notes)
+            {
+                <MudItem xs="12" md="6">
+                    <NoteCard Note="note" CategoryName="@category.Name" />
+                </MudItem>
+            }
+        </MudGrid>
+    }
+    else
+    {
+        <MudAlert Severity="Severity.Info">此分类下暂无笔记</MudAlert>
+    }
+
+    <MudButton Variant="Variant.Outlined" Href="/categories" Class="mt-4">返回分类列表</MudButton>
+}
+else
+{
+    <MudAlert Severity="Severity.Error">分类不存在</MudAlert>
+    <MudButton Variant="Variant.Outlined" Href="/categories" Class="mt-2">返回分类列表</MudButton>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private Category? category;
+    private List<Note> notes = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var userId = await AuthService.GetUserIdAsync();
+        if (string.IsNullOrEmpty(userId))
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        category = await CategoryService.GetByIdAsync(Id, userId);
+        if (category != null)
+        {
+            var allNotes = await NoteService.GetAllAsync(userId);
+            notes = allNotes.Where(n => n.CategoryId == Id).ToList();
+        }
+    }
+}

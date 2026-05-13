@@ -1,0 +1,67 @@
+@page "/categories/new"
+@page "/categories/{Id:int}/edit"
+@inject ICategoryService CategoryService
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+
+
+<MudText Typo="Typo.h4" Color="Color.Primary" Class="mb-4">@(Id == 0 ? "新建分类" : "编辑分类")</MudText>
+
+<MudCard>
+    <MudCardContent>
+        <EditForm Model="@category" OnValidSubmit="@HandleSubmit">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <MudTextField @bind-Value="category.Name" Label="名称" Required="true" Class="mb-3" />
+            <ValidationMessage For="@(() => category.Name)" />
+
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="mr-2">保存</MudButton>
+            <MudButton Variant="Variant.Outlined" Href="/categories">取消</MudButton>
+        </EditForm>
+    </MudCardContent>
+</MudCard>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private Category category = new();
+    private bool isNew => Id == 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var userId = await AuthService.GetUserIdAsync();
+        if (string.IsNullOrEmpty(userId))
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        if (!isNew)
+        {
+            category = await CategoryService.GetByIdAsync(Id, userId) ?? new Category();
+        }
+
+        category.UserId = userId;
+    }
+
+    private async Task HandleSubmit()
+    {
+        var userId = await AuthService.GetUserIdAsync();
+        if (string.IsNullOrEmpty(userId)) return;
+
+        if (isNew)
+        {
+            await CategoryService.CreateAsync(category);
+        }
+        else
+        {
+            await CategoryService.UpdateAsync(category);
+        }
+
+        Navigation.NavigateTo("/categories");
+    }
+
+
+}

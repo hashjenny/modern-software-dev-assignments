@@ -1,0 +1,53 @@
+@page "/categories"
+@inject ICategoryService CategoryService
+@inject INoteService NoteService
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+@using notehub_blazor.Components
+
+
+<MudText Typo="Typo.h4" Color="Color.Primary" Class="mb-4">分类列表</MudText>
+<MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/categories/new" StartIcon="@Icons.Material.Filled.Add">
+    新建分类
+</MudButton>
+
+@if (categories.Any())
+{
+    <MudGrid Class="mt-4">
+        @foreach (var category in categories)
+        {
+            <MudItem xs="12" md="6">
+                <CategoryCard Category="category" NoteCount="@noteCounts.GetValueOrDefault(category.Id, 0)" />
+            </MudItem>
+        }
+    </MudGrid>
+}
+else
+{
+    <MudAlert Severity="Severity.Info" Class="mt-4">暂无分类</MudAlert>
+}
+
+@code {
+    private List<Category> categories = new();
+    private Dictionary<int, int> noteCounts = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var userId = await AuthService.GetUserIdAsync();
+        if (string.IsNullOrEmpty(userId))
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        categories = (await CategoryService.GetAllAsync(userId)).ToList();
+
+        var notes = await NoteService.GetAllAsync(userId);
+        foreach (var category in categories)
+        {
+            noteCounts[category.Id] = notes.Count(n => n.CategoryId == category.Id);
+        }
+    }
+
+
+}
