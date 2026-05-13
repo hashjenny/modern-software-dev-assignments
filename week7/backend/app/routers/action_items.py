@@ -7,6 +7,11 @@ from ..models import ActionItem
 from ..schemas import ActionItemCreate, ActionItemPatch, ActionItemRead
 
 router = APIRouter(prefix="/action-items", tags=["action_items"])
+SORTABLE_FIELDS = {
+    "id": ActionItem.id,
+    "created_at": ActionItem.created_at,
+    "updated_at": ActionItem.updated_at,
+}
 
 
 @router.get("/", response_model=list[ActionItemRead])
@@ -22,9 +27,10 @@ def list_items(
         stmt = stmt.where(ActionItem.completed.is_(completed))
 
     sort_field = sort.lstrip("-")
-    order_fn = desc if sort.startswith("-") else asc
-    if hasattr(ActionItem, sort_field):
-        stmt = stmt.order_by(order_fn(getattr(ActionItem, sort_field)))
+    sort_column = SORTABLE_FIELDS.get(sort_field)
+    if sort_column is not None:
+        order_fn = desc if sort.startswith("-") else asc
+        stmt = stmt.order_by(order_fn(sort_column))
     else:
         stmt = stmt.order_by(desc(ActionItem.created_at))
 
@@ -67,4 +73,21 @@ def patch_item(
     db.add(item)
     db.flush()
     db.refresh(item)
+    return ActionItemRead.model_validate(item)
+
+
+@router.delete("/{item_id}", status_code=204)
+def delete_item(item_id: int, db: Session = Depends(get_db)) -> None:
+    item = db.get(ActionItem, item_id)
+    if not item:
+        raise HTTPException(status_code=404, detail="Action item not found")
+    db.delete(item)
+    db.flush()
+
+
+@router.get("/{item_id}", response_model=ActionItemRead)
+def get_item(item_id: int, db: Session = Depends(get_db)) -> ActionItemRead:
+    item = db.get(ActionItem, item_id)
+    if not item:
+        raise HTTPException(status_code=404, detail="Action item not found")
     return ActionItemRead.model_validate(item)

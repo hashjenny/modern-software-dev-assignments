@@ -7,6 +7,11 @@ from ..models import Note, Tag
 from ..schemas import NoteCreate, NotePatch, NoteRead, NoteTagLinkCreate
 
 router = APIRouter(prefix="/notes", tags=["notes"])
+SORTABLE_FIELDS = {
+    "id": Note.id,
+    "created_at": Note.created_at,
+    "updated_at": Note.updated_at,
+}
 
 
 @router.get("/", response_model=list[NoteRead])
@@ -22,9 +27,10 @@ def list_notes(
         stmt = stmt.where((Note.title.contains(q)) | (Note.content.contains(q)))
 
     sort_field = sort.lstrip("-")
-    order_fn = desc if sort.startswith("-") else asc
-    if hasattr(Note, sort_field):
-        stmt = stmt.order_by(order_fn(getattr(Note, sort_field)))
+    sort_column = SORTABLE_FIELDS.get(sort_field)
+    if sort_column is not None:
+        order_fn = desc if sort.startswith("-") else asc
+        stmt = stmt.order_by(order_fn(sort_column))
     else:
         stmt = stmt.order_by(desc(Note.created_at))
 
@@ -64,9 +70,18 @@ def get_note(note_id: int, db: Session = Depends(get_db)) -> NoteRead:
     return NoteRead.model_validate(note)
 
 
+@router.delete("/{note_id}", status_code=204)
+def delete_note(note_id: int, db: Session = Depends(get_db)) -> None:
+    note = db.get(Note, note_id)
+    if not note:
+        raise HTTPException(status_code=404, detail="Note not found")
+    db.delete(note)
+    db.flush()
+
+
 @router.post("/{note_id}/tags/", response_model=NoteRead)
 def add_note_tag(note_id: int, payload: NoteTagLinkCreate, db: Session = Depends(get_db)) -> NoteRead:
-    note = db.get(Note, note_id)
+    note = db.execute(select(Note).options(selectinload(Note.tags)).where(Note.id == note_id)).scalar_one_or_none()
     if not note:
         raise HTTPException(status_code=404, detail="Note not found")
     tag = db.get(Tag, payload.tag_id)
@@ -81,7 +96,7 @@ def add_note_tag(note_id: int, payload: NoteTagLinkCreate, db: Session = Depends
 
 @router.delete("/{note_id}/tags/{tag_id}", response_model=NoteRead)
 def remove_note_tag(note_id: int, tag_id: int, db: Session = Depends(get_db)) -> NoteRead:
-    note = db.get(Note, note_id)
+    note = db.execute(select(Note).options(selectinload(Note.tags)).where(Note.id == note_id)).scalar_one_or_none()
     if not note:
         raise HTTPException(status_code=404, detail="Note not found")
     tag = db.get(Tag, tag_id)
