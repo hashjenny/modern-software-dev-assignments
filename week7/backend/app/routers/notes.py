@@ -28,11 +28,11 @@ def list_notes(
 
     sort_field = sort.lstrip("-")
     sort_column = SORTABLE_FIELDS.get(sort_field)
-    if sort_column is None:
-        stmt = stmt.order_by(desc(Note.created_at))
-    else:
+    if sort_column is not None:
         order_fn = desc if sort.startswith("-") else asc
         stmt = stmt.order_by(order_fn(sort_column))
+    else:
+        stmt = stmt.order_by(desc(Note.created_at))
 
     rows = db.execute(stmt.offset(skip).limit(limit)).scalars().all()
     return [NoteRead.model_validate(row) for row in rows]
