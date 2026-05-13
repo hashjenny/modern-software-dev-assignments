@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import asc, desc, select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from ..db import get_db
-from ..models import Note
-from ..schemas import NoteCreate, NotePatch, NoteRead
+from ..models import Note, Tag
+from ..schemas import NoteCreate, NotePatch, NoteRead, NoteTagLinkCreate
 
 router = APIRouter(prefix="/notes", tags=["notes"])
 
@@ -17,7 +17,7 @@ def list_notes(
     limit: int = Query(50, le=200),
     sort: str = Query("-created_at", description="Sort by field, prefix with - for desc"),
 ) -> list[NoteRead]:
-    stmt = select(Note)
+    stmt = select(Note).options(selectinload(Note.tags))
     if q:
         stmt = stmt.where((Note.title.contains(q)) | (Note.content.contains(q)))
 
@@ -58,7 +58,37 @@ def patch_note(note_id: int, payload: NotePatch, db: Session = Depends(get_db)) 
 
 @router.get("/{note_id}", response_model=NoteRead)
 def get_note(note_id: int, db: Session = Depends(get_db)) -> NoteRead:
+    note = db.execute(select(Note).options(selectinload(Note.tags)).where(Note.id == note_id)).scalar_one_or_none()
+    if not note:
+        raise HTTPException(status_code=404, detail="Note not found")
+    return NoteRead.model_validate(note)
+
+
+@router.post("/{note_id}/tags/", response_model=NoteRead)
+def add_note_tag(note_id: int, payload: NoteTagLinkCreate, db: Session = Depends(get_db)) -> NoteRead:
     note = db.get(Note, note_id)
     if not note:
         raise HTTPException(status_code=404, detail="Note not found")
+    tag = db.get(Tag, payload.tag_id)
+    if not tag:
+        raise HTTPException(status_code=404, detail="Tag not found")
+    if tag not in note.tags:
+        note.tags.append(tag)
+    db.add(note)
+    db.flush()
+    return NoteRead.model_validate(note)
+
+
+@router.delete("/{note_id}/tags/{tag_id}", response_model=NoteRead)
+def remove_note_tag(note_id: int, tag_id: int, db: Session = Depends(get_db)) -> NoteRead:
+    note = db.get(Note, note_id)
+    if not note:
+        raise HTTPException(status_code=404, detail="Note not found")
+    tag = db.get(Tag, tag_id)
+    if not tag:
+        raise HTTPException(status_code=404, detail="Tag not found")
+    if tag in note.tags:
+        note.tags.remove(tag)
+    db.add(note)
+    db.flush()
     return NoteRead.model_validate(note)
