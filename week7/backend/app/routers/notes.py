@@ -7,6 +7,11 @@ from ..models import Note
 from ..schemas import NoteCreate, NotePatch, NoteRead
 
 router = APIRouter(prefix="/notes", tags=["notes"])
+SORTABLE_FIELDS = {
+    "id": Note.id,
+    "created_at": Note.created_at,
+    "updated_at": Note.updated_at,
+}
 
 
 @router.get("/", response_model=list[NoteRead])
@@ -22,11 +27,12 @@ def list_notes(
         stmt = stmt.where((Note.title.contains(q)) | (Note.content.contains(q)))
 
     sort_field = sort.lstrip("-")
-    order_fn = desc if sort.startswith("-") else asc
-    if hasattr(Note, sort_field):
-        stmt = stmt.order_by(order_fn(getattr(Note, sort_field)))
-    else:
+    sort_column = SORTABLE_FIELDS.get(sort_field)
+    if sort_column is None:
         stmt = stmt.order_by(desc(Note.created_at))
+    else:
+        order_fn = desc if sort.startswith("-") else asc
+        stmt = stmt.order_by(order_fn(sort_column))
 
     rows = db.execute(stmt.offset(skip).limit(limit)).scalars().all()
     return [NoteRead.model_validate(row) for row in rows]
@@ -34,10 +40,6 @@ def list_notes(
 
 @router.post("/", response_model=NoteRead, status_code=201)
 def create_note(payload: NoteCreate, db: Session = Depends(get_db)) -> NoteRead:
-    if len(payload.title) > 200:
-        raise HTTPException(status_code=422, detail="title must be at most 200 characters")
-    if len(payload.content) > 10000:
-        raise HTTPException(status_code=422, detail="content must be at most 10000 characters")
     note = Note(title=payload.title, content=payload.content)
     db.add(note)
     db.flush()

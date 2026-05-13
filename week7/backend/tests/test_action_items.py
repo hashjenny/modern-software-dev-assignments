@@ -39,3 +39,25 @@ def test_create_action_item_description_too_long(client):
     payload = {"description": "x" * 2001}
     r = client.post("/action-items/", json=payload)
     assert r.status_code == 422
+
+
+def test_patch_action_item_description_too_long(client):
+    payload = {"description": "Valid"}
+    created = client.post("/action-items/", json=payload)
+    item_id = created.json()["id"]
+
+    r = client.patch(f"/action-items/{item_id}", json={"description": "x" * 2001})
+    assert r.status_code == 422
+
+
+def test_list_action_items_invalid_sort_falls_back_to_default(client):
+    first = client.post("/action-items/", json={"description": "First"})
+    second = client.post("/action-items/", json={"description": "Second"})
+    first_id = first.json()["id"]
+    second_id = second.json()["id"]
+
+    r = client.get("/action-items/", params={"sort": "metadata"})
+    assert r.status_code == 200
+    ids = [item["id"] for item in r.json()]
+    assert ids[0] == second_id
+    assert ids[1] == first_id

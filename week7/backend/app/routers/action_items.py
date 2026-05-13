@@ -7,6 +7,11 @@ from ..models import ActionItem
 from ..schemas import ActionItemCreate, ActionItemPatch, ActionItemRead
 
 router = APIRouter(prefix="/action-items", tags=["action_items"])
+SORTABLE_FIELDS = {
+    "id": ActionItem.id,
+    "created_at": ActionItem.created_at,
+    "updated_at": ActionItem.updated_at,
+}
 
 
 @router.get("/", response_model=list[ActionItemRead])
@@ -22,11 +27,12 @@ def list_items(
         stmt = stmt.where(ActionItem.completed.is_(completed))
 
     sort_field = sort.lstrip("-")
-    order_fn = desc if sort.startswith("-") else asc
-    if hasattr(ActionItem, sort_field):
-        stmt = stmt.order_by(order_fn(getattr(ActionItem, sort_field)))
-    else:
+    sort_column = SORTABLE_FIELDS.get(sort_field)
+    if sort_column is None:
         stmt = stmt.order_by(desc(ActionItem.created_at))
+    else:
+        order_fn = desc if sort.startswith("-") else asc
+        stmt = stmt.order_by(order_fn(sort_column))
 
     rows = db.execute(stmt.offset(skip).limit(limit)).scalars().all()
     return [ActionItemRead.model_validate(row) for row in rows]
@@ -34,8 +40,6 @@ def list_items(
 
 @router.post("/", response_model=ActionItemRead, status_code=201)
 def create_item(payload: ActionItemCreate, db: Session = Depends(get_db)) -> ActionItemRead:
-    if len(payload.description) > 2000:
-        raise HTTPException(status_code=422, detail="description must be at most 2000 characters")
     item = ActionItem(description=payload.description, completed=False)
     db.add(item)
     db.flush()

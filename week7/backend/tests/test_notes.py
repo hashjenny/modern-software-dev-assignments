@@ -46,3 +46,25 @@ def test_create_note_content_too_long(client):
     payload = {"title": "Valid title", "content": "x" * 10001}
     r = client.post("/notes/", json=payload)
     assert r.status_code == 422
+
+
+def test_patch_note_content_too_long(client):
+    payload = {"title": "Valid title", "content": "Valid content"}
+    created = client.post("/notes/", json=payload)
+    note_id = created.json()["id"]
+
+    r = client.patch(f"/notes/{note_id}", json={"content": "x" * 10001})
+    assert r.status_code == 422
+
+
+def test_list_notes_invalid_sort_falls_back_to_default(client):
+    first = client.post("/notes/", json={"title": "First", "content": "one"})
+    second = client.post("/notes/", json={"title": "Second", "content": "two"})
+    first_id = first.json()["id"]
+    second_id = second.json()["id"]
+
+    r = client.get("/notes/", params={"sort": "metadata"})
+    assert r.status_code == 200
+    ids = [item["id"] for item in r.json()]
+    assert ids[0] == second_id
+    assert ids[1] == first_id
