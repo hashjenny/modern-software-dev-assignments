@@ -51,7 +51,9 @@ def extract_action_items(text: str) -> list[ActionItem]:
     for line in lines:
         normalized = line.lower()
         if not (
-            normalized.startswith("todo:") or normalized.startswith("action:") or line.endswith("!")
+            normalized.startswith("todo:")
+            or normalized.startswith("action:")
+            or line.endswith("!")
             or normalized.startswith("[ ]")
         ):
             continue
