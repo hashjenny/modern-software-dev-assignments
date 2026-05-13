@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}笔记列表 - NoteHub{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <form action="{% url 'search' %}" method="get" class="flex gap-2">
+        <input type="text" name="q" value="{{ query|default:'' }}" placeholder="搜索笔记..." class="border rounded px-4 py-2 w-full max-w-md">
+        <button type="submit" class="bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-700">搜索</button>
+    </form>
+</div>
+
+<h1 class="text-2xl font-bold mb-6">全部笔记</h1>
+
+{% if notes %}
+<div class="grid gap-4">
+    {% for note in notes %}
+    <a href="{% url 'note_detail' note.id %}" class="block bg-white p-6 rounded-lg shadow hover:shadow-md transition">
+        <h2 class="text-lg font-semibold text-gray-800">{{ note.title }}</h2>
+        {% if note.content %}
+        <p class="text-gray-500 mt-2 line-clamp-2">{{ note.content|truncatewords:30 }}</p>
+        {% endif %}
+        <div class="flex items-center gap-4 mt-4 text-sm text-gray-400">
+            {% if note.category %}
+            <span class="bg-gray-100 px-2 py-1 rounded">{{ note.category.name }}</span>
+            {% endif %}
+            <span>{{ note.created_at|date:"Y-m-d" }}</span>
+        </div>
+    </a>
+    {% endfor %}
+</div>
+{% else %}
+<p class="text-gray-500 text-center py-12">暂无笔记，<a href="{% url 'note_create' %}" class="text-blue-500 hover:underline">创建第一篇</a></p>
+{% endif %}
+{% endblock %}

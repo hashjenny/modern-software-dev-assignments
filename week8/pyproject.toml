@@ -3,7 +3,9 @@ name = "week8"
 version = "0.1.0"
 description = "Week 8 assignment"
 requires-python = ">=3.10"
-dependencies = []
+dependencies = [
+    "django>=5.0",
+]
 
 [project.optional-dependencies]
 dev = [

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}{{ category.name }} - 分类笔记 - NoteHub{% endblock %}
+
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold">{{ category.name }}</h1>
+    <a href="{% url 'category_list' %}" class="text-gray-600 hover:text-gray-800">← 返回分类</a>
+</div>
+
+{% if notes %}
+<div class="grid gap-4">
+    {% for note in notes %}
+    <a href="{% url 'note_detail' note.id %}" class="block bg-white p-6 rounded-lg shadow hover:shadow-md transition">
+        <h2 class="text-lg font-semibold text-gray-800">{{ note.title }}</h2>
+        {% if note.content %}
+        <p class="text-gray-500 mt-2 line-clamp-2">{{ note.content|truncatewords:30 }}</p>
+        {% endif %}
+        <div class="mt-4 text-sm text-gray-400">{{ note.created_at|date:"Y-m-d" }}</div>
+    </a>
+    {% endfor %}
+</div>
+{% else %}
+<p class="text-gray-500 text-center py-12">该分类下暂无笔记</p>
+{% endif %}
+{% endblock %}

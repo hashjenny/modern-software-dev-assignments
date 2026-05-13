@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}分类列表 - NoteHub{% endblock %}
+
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold">分类</h1>
+    <a href="{% url 'category_create' %}" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">新建分类</a>
+</div>
+
+{% if categories %}
+<div class="grid gap-4 grid-cols-2">
+    {% for category in categories %}
+    <div class="bg-white rounded-lg shadow p-4 flex justify-between items-center">
+        <div>
+            <a href="{% url 'category_detail' category.id %}" class="text-lg font-semibold text-gray-800 hover:text-blue-500">{{ category.name }}</a>
+            <p class="text-sm text-gray-400 mt-1">{{ category.notes.count }} 篇笔记</p>
+        </div>
+        <a href="{% url 'category_delete' category.id %}" class="text-red-500 hover:underline text-sm">删除</a>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<p class="text-gray-500 text-center py-12">暂无分类</p>
+{% endif %}
+{% endblock %}

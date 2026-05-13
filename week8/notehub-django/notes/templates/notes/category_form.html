@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}新建分类 - NoteHub{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto">
+    <h1 class="text-2xl font-bold mb-6">新建分类</h1>
+    <form method="post" class="bg-white rounded-lg shadow p-6 space-y-4">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div class="flex gap-4">
+            <button type="submit" class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600">保存</button>
+            <a href="{% url 'category_list' %}" class="px-6 py-2 border rounded hover:bg-gray-50">取消</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
