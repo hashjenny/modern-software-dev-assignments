@@ -19,4 +19,4 @@ makemigrations:
 	$(MANAGE_PY) makemigrations notes
 
 runserver:
-	$(MANAGE_PY) runserver 0.0.0.0:8001
+	$(MANAGE_PY) runserver 127.0.0.1:8001

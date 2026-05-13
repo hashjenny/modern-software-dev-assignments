@@ -6,7 +6,9 @@
     "migrate": "uv run ./notehub-django/manage.py migrate",
     "make_migrations": "uv run ./notehub-django/manage.py makemigrations notes",
     "migrate_notes": "uv run ./notehub-django/manage.py migrate notes",
-    "runserver": "uv run ./notehub-django/manage.py runserver 127.0.0.1:8001"
+    "runserver": "uv run ./notehub-django/manage.py runserver 127.0.0.1:8001",
+    "dotnet_restore": "dotnet restore ./notehub-blazor/notehub-blazor.csproj",
+    "dotnet_run": "dotnet run --project ./notehub-blazor/notehub-blazor.csproj"
   },
   "keywords": [],
   "author": "",
