@@ -76,7 +76,6 @@ def add_note_tag(note_id: int, payload: NoteTagLinkCreate, db: Session = Depends
         note.tags.append(tag)
     db.add(note)
     db.flush()
-    db.refresh(note)
     return NoteRead.model_validate(note)
 
 
@@ -92,5 +91,4 @@ def remove_note_tag(note_id: int, tag_id: int, db: Session = Depends(get_db)) ->
         note.tags.remove(tag)
     db.add(note)
     db.flush()
-    db.refresh(note)
     return NoteRead.model_validate(note)
