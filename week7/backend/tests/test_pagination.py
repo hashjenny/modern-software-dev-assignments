@@ -46,10 +46,10 @@ def test_notes_pagination_skip(client: TestClient) -> None:
     assert r2.status_code == 200
     page2 = r2.json()
 
-    # Pages should have different items
+    # Pages should not overlap
     page1_ids = {item["id"] for item in page1}
     page2_ids = {item["id"] for item in page2}
-    assert page1_ids != page2_ids
+    assert page1_ids.isdisjoint(page2_ids)
 
 
 def test_notes_pagination_skip_beyond_total(client: TestClient) -> None:
@@ -193,14 +193,17 @@ def test_action_items_pagination_skip(client: TestClient) -> None:
         client.post("/action-items/", json={"description": f"Item {i}"})
 
     r1 = client.get("/action-items/", params={"skip": 0, "limit": 5})
+    assert r1.status_code == 200
     page1 = r1.json()
 
     r2 = client.get("/action-items/", params={"skip": 5, "limit": 5})
+    assert r2.status_code == 200
     page2 = r2.json()
 
+    # Pages should not overlap
     page1_ids = {item["id"] for item in page1}
     page2_ids = {item["id"] for item in page2}
-    assert page1_ids != page2_ids
+    assert page1_ids.isdisjoint(page2_ids)
 
 
 def test_action_items_pagination_skip_beyond_total(client: TestClient) -> None:
@@ -339,20 +342,21 @@ def test_action_items_pagination_with_sort(client: TestClient) -> None:
 def test_notes_pagination_negative_skip(client: TestClient) -> None:
     """Test that negative skip is treated as 0."""
     client.post("/notes/", json={"title": "Test", "content": "Test"})
-    r = client.get("/notes/", params={"skip": -5, "limit": 10})
-    assert r.status_code == 200
-    items = r.json()
-    # Should return items from start
-    assert len(items) >= 1
+    r_negative = client.get("/notes/", params={"skip": -5, "limit": 10})
+    assert r_negative.status_code == 200
+    r_zero = client.get("/notes/", params={"skip": 0, "limit": 10})
+    assert r_zero.status_code == 200
+    assert r_negative.json() == r_zero.json()
 
 
 def test_action_items_pagination_negative_skip(client: TestClient) -> None:
     """Test that negative skip is treated as 0."""
     client.post("/action-items/", json={"description": "Test"})
-    r = client.get("/action-items/", params={"skip": -5, "limit": 10})
-    assert r.status_code == 200
-    items = r.json()
-    assert len(items) >= 1
+    r_negative = client.get("/action-items/", params={"skip": -5, "limit": 10})
+    assert r_negative.status_code == 200
+    r_zero = client.get("/action-items/", params={"skip": 0, "limit": 10})
+    assert r_zero.status_code == 200
+    assert r_negative.json() == r_zero.json()
 
 
 def test_notes_search_with_pagination_and_sort(client: TestClient) -> None:
