@@ -1,8 +1,6 @@
 @page "/notes/{Id:int}"
 @inject INoteService NoteService
 @inject ICategoryService CategoryService
-@inject IAuthService AuthService
-@inject NavigationManager Navigation
 
 @if (note != null)
 {
@@ -83,17 +81,10 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        var userId = await AuthService.GetUserIdAsync();
-        if (string.IsNullOrEmpty(userId))
-        {
-            Navigation.NavigateTo("/login");
-            return;
-        }
-
-        note = await NoteService.GetByIdAsync(Id, userId);
+        note = await NoteService.GetByIdAsync(Id);
         if (note?.CategoryId.HasValue == true)
         {
-            category = await CategoryService.GetByIdAsync(note.CategoryId.Value, userId);
+            category = await CategoryService.GetByIdAsync(note.CategoryId.Value);
         }
     }
 }

@@ -2,7 +2,6 @@
 @page "/notes/{Id:int}/edit"
 @inject INoteService NoteService
 @inject ICategoryService CategoryService
-@inject IAuthService AuthService
 @inject NavigationManager Navigation
 
 <div class="card animate-slide-up">
@@ -57,28 +56,16 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var userId = await AuthService.GetUserIdAsync();
-        if (string.IsNullOrEmpty(userId))
-        {
-            Navigation.NavigateTo("/login");
-            return;
-        }
-
-        categories = (await CategoryService.GetAllAsync(userId)).ToList();
+        categories = (await CategoryService.GetAllAsync()).ToList();
 
         if (!isNew)
         {
-            note = await NoteService.GetByIdAsync(Id, userId) ?? new Note();
+            note = await NoteService.GetByIdAsync(Id) ?? new Note();
         }
-
-        note.UserId = userId;
     }
 
     private async Task HandleSubmit()
     {
-        var userId = await AuthService.GetUserIdAsync();
-        if (string.IsNullOrEmpty(userId)) return;
-
         if (isNew)
         {
             await NoteService.CreateAsync(note);

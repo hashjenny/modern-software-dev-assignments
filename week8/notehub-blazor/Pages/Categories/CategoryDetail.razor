@@ -1,6 +1,5 @@
 @page "/categories/{Id:int}"
 @inject ICategoryService CategoryService
-@inject IAuthService AuthService
 @inject INoteService NoteService
 @inject NavigationManager Navigation
 
@@ -97,27 +96,17 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        var userId = await AuthService.GetUserIdAsync();
-        if (string.IsNullOrEmpty(userId))
-        {
-            Navigation.NavigateTo("/login");
-            return;
-        }
-
-        category = await CategoryService.GetByIdAsync(Id, userId);
+        category = await CategoryService.GetByIdAsync(Id);
         if (category != null)
         {
-            var allNotes = await NoteService.GetAllAsync(userId);
+            var allNotes = await NoteService.GetAllAsync();
             notes = allNotes.Where(n => n.CategoryId == Id).ToList();
         }
     }
 
     private async Task HandleDelete()
     {
-        var userId = await AuthService.GetUserIdAsync();
-        if (string.IsNullOrEmpty(userId)) return;
-
-        await CategoryService.DeleteAsync(Id, userId);
+        await CategoryService.DeleteAsync(Id);
         Navigation.NavigateTo("/categories");
     }
 }

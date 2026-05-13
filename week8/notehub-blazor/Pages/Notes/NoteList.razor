@@ -1,8 +1,6 @@
 @page "/notes"
 @inject INoteService NoteService
-@inject IAuthService AuthService
 @inject ICategoryService CategoryService
-@inject NavigationManager Navigation
 
 <div class="page-header animate-slide-up">
     <h1 class="page-title">笔记列表</h1>
@@ -46,18 +44,11 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        var userId = await AuthService.GetUserIdAsync();
-        if (string.IsNullOrEmpty(userId))
-        {
-            Navigation.NavigateTo("/login");
-            return;
-        }
-
-        notes = (await NoteService.GetAllAsync(userId))
+        notes = (await NoteService.GetAllAsync())
             .OrderByDescending(n => n.CreatedAt)
             .ToList();
 
-        var categories = await CategoryService.GetAllAsync(userId);
+        var categories = await CategoryService.GetAllAsync();
         foreach (var category in categories)
         {
             categoryNames[category.Id] = category.Name;

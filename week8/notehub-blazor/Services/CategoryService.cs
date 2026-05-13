@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using notehub_blazor.Data;
 using notehub_blazor.Models;
 
@@ -5,45 +6,49 @@ namespace notehub_blazor.Services;
 
 public class CategoryService : ICategoryService
 {
-    private readonly LiteDbContext _context;
+    private readonly AppDbContext _context;
 
-    public CategoryService(LiteDbContext context)
+    public CategoryService(AppDbContext context)
     {
         _context = context;
     }
 
-    public Task<IEnumerable<Category>> GetAllAsync(string userId)
+    public async Task<IEnumerable<Category>> GetAllAsync()
     {
-        var categories = _context.Categories.Find(c => c.UserId == userId).ToList();
-        return Task.FromResult<IEnumerable<Category>>(categories);
+        return await _context.Categories
+            .OrderBy(c => c.Name)
+            .ToListAsync();
     }
 
-    public Task<Category?> GetByIdAsync(int id, string userId)
+    public async Task<Category?> GetByIdAsync(int id)
     {
-        var category = _context.Categories.FindOne(c => c.Id == id && c.UserId == userId);
-        return Task.FromResult<Category?>(category);
+        return await _context.Categories
+            .FirstOrDefaultAsync(c => c.Id == id);
     }
 
-    public Task<Category> CreateAsync(Category category)
+    public async Task<Category> CreateAsync(Category category)
     {
-        var maxId = _context.Categories.FindAll().Any()
-            ? _context.Categories.FindAll().Max(c => c.Id) + 1
-            : 1;
-        category.Id = maxId;
         category.CreatedAt = DateTime.UtcNow;
-        _context.Categories.Insert(category);
-        return Task.FromResult(category);
+        _context.Categories.Add(category);
+        await _context.SaveChangesAsync();
+        return category;
     }
 
-    public Task<Category> UpdateAsync(Category category)
+    public async Task<Category> UpdateAsync(Category category)
     {
         _context.Categories.Update(category);
-        return Task.FromResult(category);
+        await _context.SaveChangesAsync();
+        return category;
     }
 
-    public Task DeleteAsync(int id, string userId)
+    public async Task DeleteAsync(int id)
     {
-        _context.Categories.DeleteMany(c => c.Id == id && c.UserId == userId);
-        return Task.CompletedTask;
+        var category = await _context.Categories
+            .FirstOrDefaultAsync(c => c.Id == id);
+        if (category != null)
+        {
+            _context.Categories.Remove(category);
+            await _context.SaveChangesAsync();
+        }
     }
 }

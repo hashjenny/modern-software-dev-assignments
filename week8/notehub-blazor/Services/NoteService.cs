@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using notehub_blazor.Data;
 using notehub_blazor.Models;
 
@@ -5,57 +6,78 @@ namespace notehub_blazor.Services;
 
 public class NoteService : INoteService
 {
-    private readonly LiteDbContext _context;
+    private readonly AppDbContext _context;
 
-    public NoteService(LiteDbContext context)
+    public NoteService(AppDbContext context)
     {
         _context = context;
     }
 
-    public Task<IEnumerable<Note>> GetAllAsync(string userId)
+    public async Task<IEnumerable<Note>> GetAllAsync()
     {
-        var notes = _context.Notes.Find(n => n.UserId == userId).ToList();
-        return Task.FromResult<IEnumerable<Note>>(notes);
+        return await _context.Notes
+            .OrderByDescending(n => n.CreatedAt)
+            .ToListAsync();
     }
 
-    public Task<Note?> GetByIdAsync(int id, string userId)
+    public async Task<Note?> GetByIdAsync(int id)
     {
-        var note = _context.Notes.FindOne(n => n.Id == id && n.UserId == userId);
-        return Task.FromResult<Note?>(note);
+        return await _context.Notes
+            .FirstOrDefaultAsync(n => n.Id == id);
     }
 
-    public Task<Note> CreateAsync(Note note)
+    public async Task<Note> CreateAsync(Note note)
     {
-        var maxId = _context.Notes.FindAll().Any()
-            ? _context.Notes.FindAll().Max(n => n.Id) + 1
-            : 1;
-        note.Id = maxId;
         note.CreatedAt = DateTime.UtcNow;
         note.UpdatedAt = DateTime.UtcNow;
-        _context.Notes.Insert(note);
-        return Task.FromResult(note);
+        _context.Notes.Add(note);
+        await _context.SaveChangesAsync();
+        return note;
     }
 
-    public Task<Note> UpdateAsync(Note note)
+    public async Task<Note> UpdateAsync(Note note)
     {
         note.UpdatedAt = DateTime.UtcNow;
         _context.Notes.Update(note);
-        return Task.FromResult(note);
+        await _context.SaveChangesAsync();
+        return note;
     }
 
-    public Task DeleteAsync(int id, string userId)
+    public async Task DeleteAsync(int id)
     {
-        _context.Notes.DeleteMany(n => n.Id == id && n.UserId == userId);
-        return Task.CompletedTask;
+        var note = await _context.Notes
+            .FirstOrDefaultAsync(n => n.Id == id);
+        if (note != null)
+        {
+            _context.Notes.Remove(note);
+            await _context.SaveChangesAsync();
+        }
     }
 
-    public Task<IEnumerable<Note>> SearchAsync(string query, string userId)
+    public async Task<IEnumerable<Note>> SearchAsync(string query)
     {
-        var notes = _context.Notes
-            .Find(n => n.UserId == userId &&
-                (n.Title.Contains(query, StringComparison.OrdinalIgnoreCase) ||
-                 n.Content.Contains(query, StringComparison.OrdinalIgnoreCase)))
+        var tokens = SearchHelpers.Tokenize(query);
+        if (tokens.Count == 0)
+        {
+            return Array.Empty<Note>();
+        }
+
+        IQueryable<Note> queryable = _context.Notes;
+        foreach (var token in tokens)
+        {
+            var pattern = $"%{token}%";
+            queryable = queryable.Where(n =>
+                EF.Functions.Like(n.Title.ToLower(), pattern) ||
+                EF.Functions.Like(n.Content.ToLower(), pattern));
+        }
+
+        var results = await queryable.ToListAsync();
+
+        return results
+            .Select(note => new { Note = note, Score = SearchHelpers.Score(note, tokens) })
+            .OrderByDescending(item => item.Score)
+            .ThenByDescending(item => item.Note.UpdatedAt)
+            .Select(item => item.Note)
             .ToList();
-        return Task.FromResult<IEnumerable<Note>>(notes);
     }
 }

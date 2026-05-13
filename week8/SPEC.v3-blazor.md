@@ -4,11 +4,11 @@
 
 | 项目 | 选择 |
 |------|------|
-| 框架 | Blazor Server（.NET 8） |
-| 语言 | C# 12 |
-| 数据库 | LiteDB（嵌入式 NoSQL） |
-| ORM | LiteDB 原生驱动（`LiteDB` NuGet 包） |
-| 认证 | 单用户模式（默认用户） |
+| 框架 | Blazor Server（.NET 10） |
+| 语言 | C# 13 |
+| 数据库 | SQLite（嵌入式关系型） |
+| ORM | Entity Framework Core（`Microsoft.EntityFrameworkCore.Sqlite`） |
+| 认证 | 无（不做用户认证） |
 | 部署 | Docker（.NET 官方镜像） |
 
 ---
@@ -41,10 +41,9 @@ notehub-blazor/
 │   ├── INoteService.cs
 │   ├── NoteService.cs
 │   ├── ICategoryService.cs
-│   ├── CategoryService.cs
-│   └── AuthService.cs
+│   └── CategoryService.cs
 ├── Data/
-│   └── LiteDbContext.cs     # LiteDB 连接管理
+│   └── AppDbContext.cs      # EF Core DbContext
 ├── App.razor
 ├── Program.cs
 ├── notehub-blazor.csproj
@@ -65,7 +64,6 @@ public class Note
     public string Title { get; set; } = string.Empty;
     public string Content { get; set; } = string.Empty;
     public int? CategoryId { get; set; }
-    public string UserId { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 }
@@ -78,7 +76,6 @@ public class Category
 {
     public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
-    public string UserId { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
 ```
@@ -92,12 +89,12 @@ public class Category
 ```csharp
 public interface INoteService
 {
-    Task<IEnumerable<Note>> GetAllAsync(string userId);
-    Task<Note?> GetByIdAsync(int id, string userId);
+    Task<IEnumerable<Note>> GetAllAsync();
+    Task<Note?> GetByIdAsync(int id);
     Task<Note> CreateAsync(Note note);
     Task<Note> UpdateAsync(Note note);
-    Task DeleteAsync(int id, string userId);
-    Task<IEnumerable<Note>> SearchAsync(string query, string userId);
+    Task DeleteAsync(int id);
+    Task<IEnumerable<Note>> SearchAsync(string query);
 }
 ```
 
@@ -106,20 +103,10 @@ public interface INoteService
 ```csharp
 public interface ICategoryService
 {
-    Task<IEnumerable<Category>> GetAllAsync(string userId);
-    Task<Category?> GetByIdAsync(int id, string userId);
+    Task<IEnumerable<Category>> GetAllAsync();
+    Task<Category?> GetByIdAsync(int id);
     Task<Category> CreateAsync(Category category);
-    Task DeleteAsync(int id, string userId);
-}
-```
-
-### 4.3 IAuthService
-
-```csharp
-public interface IAuthService
-{
-    Task<string?> GetUserIdAsync();
-    Task<string?> GetUserNameAsync();
+    Task DeleteAsync(int id);
 }
 ```
 
@@ -155,7 +142,6 @@ public interface IAuthService
 
 - 笔记标题：必填，最大 200 字符（`[Required]` + `[StringLength(200)]`）
 - 分类名称：必填，唯一，最大 100 字符
-- 使用默认用户 ID（`default-user`）进行所有操作
 - 错误处理：Blazor `EditForm` 验证
 
 ---
@@ -165,11 +151,11 @@ public interface IAuthService
 ### Dockerfile
 
 ```dockerfile
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
 WORKDIR /app
 EXPOSE 8080
 
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 COPY ["notehub-blazor.csproj", "./"]
 RUN dotnet restore
@@ -224,7 +210,8 @@ docker-compose up --build
 ## 10. 依赖（.csproj）
 
 ```xml
-<PackageReference Include="LiteDB" Version="5.0.21" />
+<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.0" />
+<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.0" />
 ```
 
 ---
@@ -232,6 +219,5 @@ docker-compose up --build
 ## 11. 备注
 
 - Blazor Server 通过 SignalR 保持 WebSocket 连接，页面状态在服务端管理
-- 单用户模式，使用固定的用户 ID 和名称
-- LiteDB 是嵌入式数据库，数据文件存储在 `App_Data/notehub.db`
-- 搜索使用 LiteDB 字符串包含查询（`Contains`）
+- SQLite 数据文件存储在 `App_Data/notehub.sqlite`
+- 搜索使用 EF Core 字符串包含查询（`Contains`）

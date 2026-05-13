@@ -1,7 +1,6 @@
 @page "/categories/new"
 @page "/categories/{Id:int}/edit"
 @inject ICategoryService CategoryService
-@inject IAuthService AuthService
 @inject NavigationManager Navigation
 
 <div class="card animate-slide-up">
@@ -38,26 +37,14 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var userId = await AuthService.GetUserIdAsync();
-        if (string.IsNullOrEmpty(userId))
-        {
-            Navigation.NavigateTo("/login");
-            return;
-        }
-
         if (!isNew)
         {
-            category = await CategoryService.GetByIdAsync(Id, userId) ?? new Category();
+            category = await CategoryService.GetByIdAsync(Id) ?? new Category();
         }
-
-        category.UserId = userId;
     }
 
     private async Task HandleSubmit()
     {
-        var userId = await AuthService.GetUserIdAsync();
-        if (string.IsNullOrEmpty(userId)) return;
-
         if (isNew)
         {
             await CategoryService.CreateAsync(category);

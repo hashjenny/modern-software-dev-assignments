@@ -1,4 +1,3 @@
-@inject IAuthService AuthService
 @inject NavigationManager Navigation
 
 @inherits LayoutComponentBase
@@ -56,8 +55,8 @@
     <main class="main-content">
         <header class="header">
             <div class="flex items-center gap-md">
-                <div class="user-avatar">@GetUserInitial()</div>
-                <span class="text-secondary">@userName</span>
+                <div class="user-avatar">N</div>
+                <span class="text-secondary">本地模式</span>
             </div>
         </header>
 
@@ -86,19 +85,6 @@
 </style>
 
 @code {
-    private string? userName;
-
-    protected override async Task OnInitializedAsync()
-    {
-        userName = await AuthService.GetUserNameAsync();
-    }
-
-    private string GetUserInitial()
-    {
-        if (string.IsNullOrEmpty(userName)) return "?";
-        return userName.First().ToString().ToUpper();
-    }
-
     private string GetNavClass(string href)
     {
         var uri = Navigation.ToAbsoluteUri(Navigation.Uri);

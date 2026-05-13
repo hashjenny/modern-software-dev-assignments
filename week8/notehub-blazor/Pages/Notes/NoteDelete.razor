@@ -1,6 +1,5 @@
 @page "/notes/{Id:int}/delete"
 @inject INoteService NoteService
-@inject IAuthService AuthService
 @inject NavigationManager Navigation
 
 @if (note != null)
@@ -50,22 +49,12 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        var userId = await AuthService.GetUserIdAsync();
-        if (string.IsNullOrEmpty(userId))
-        {
-            Navigation.NavigateTo("/login");
-            return;
-        }
-
-        note = await NoteService.GetByIdAsync(Id, userId);
+        note = await NoteService.GetByIdAsync(Id);
     }
 
     private async Task HandleDelete()
     {
-        var userId = await AuthService.GetUserIdAsync();
-        if (string.IsNullOrEmpty(userId)) return;
-
-        await NoteService.DeleteAsync(Id, userId);
+        await NoteService.DeleteAsync(Id);
         Navigation.NavigateTo("/notes");
     }
 }

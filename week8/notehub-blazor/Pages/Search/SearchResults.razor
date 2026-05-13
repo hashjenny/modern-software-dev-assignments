@@ -1,8 +1,9 @@
 @page "/search"
 @inject INoteService NoteService
 @inject ICategoryService CategoryService
-@inject IAuthService AuthService
 @inject NavigationManager Navigation
+@implements IDisposable
+
 
 <div class="page-header animate-slide-up">
     <h1 class="page-title">搜索结果</h1>
@@ -10,16 +11,13 @@
 
 <div class="search-container animate-slide-up animate-delay-1">
     <div class="search-box">
-        <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2">
             <circle cx="11" cy="11" r="8"></circle>
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
         </svg>
-        <input
-            type="text"
-            class="search-input"
-            placeholder="输入搜索关键词"
-            @bind="searchQuery"
-            @onkeydown="@(e => { if (e.Key == "Enter") HandleSearch(); })" />
+        <input type="text" class="search-input" placeholder="输入搜索关键词" @bind="searchQuery"
+               @onkeydown="@(e => { if (e.Key == "Enter") HandleSearch(); })" />
         <button class="btn btn-primary search-btn" @onclick="HandleSearch">搜索</button>
     </div>
 </div>
@@ -62,6 +60,17 @@ else if (!string.IsNullOrEmpty(query))
 
     protected override async Task OnInitializedAsync()
     {
+        Navigation.LocationChanged += OnLocationChanged;
+        await LoadFromUri();
+    }
+
+    private async void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        await LoadFromUri();
+    }
+
+    private async Task LoadFromUri()
+    {
         var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
         var queryParams = QueryHelpers.ParseQuery(uri.Query);
         query = queryParams.TryGetValue("q", out var qValue) ? qValue.ToString() : string.Empty;
@@ -71,20 +80,22 @@ else if (!string.IsNullOrEmpty(query))
         {
             await SearchAsync();
         }
+        else
+        {
+            notes = new List<Note>();
+        }
+    }
+
+    public void Dispose()
+    {
+        Navigation.LocationChanged -= OnLocationChanged;
     }
 
     private async Task SearchAsync()
     {
-        var userId = await AuthService.GetUserIdAsync();
-        if (string.IsNullOrEmpty(userId))
-        {
-            Navigation.NavigateTo("/login");
-            return;
-        }
+        notes = (await NoteService.SearchAsync(query)).ToList();
 
-        notes = (await NoteService.SearchAsync(query, userId)).ToList();
-
-        var categories = await CategoryService.GetAllAsync(userId);
+        var categories = await CategoryService.GetAllAsync();
         foreach (var category in categories)
         {
             categoryNames[category.Id] = category.Name;
