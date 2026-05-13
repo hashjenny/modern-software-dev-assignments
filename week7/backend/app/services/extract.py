@@ -27,7 +27,7 @@ DUE_DATE_PATTERNS = [
 
 # Assignee patterns: @user, assigned to: name, owner: name
 ASSIGNEE_PATTERNS = [
-    r"@\w+",
+    r"@([A-Za-z][A-Za-z0-9_]*)",
     r"assigned\s+to[:\s]+(\w+)",
     r"owner[:\s]+(\w+)",
 ]
@@ -39,6 +39,7 @@ def extract_action_items(text: str) -> list[ActionItem]:
 
     Recognizes:
     - Lines starting with TODO: or ACTION: (case-insensitive)
+    - Checkbox lines starting with [ ]
     - Lines ending with !
     - Priority markers: P1/P2/P3, critical, urgent, important, low
     - Due dates: @YYYY-MM-DD, due: YYYY-MM-DD, by YYYY-MM-DD, within N days
@@ -51,6 +52,7 @@ def extract_action_items(text: str) -> list[ActionItem]:
         normalized = line.lower()
         if not (
             normalized.startswith("todo:") or normalized.startswith("action:") or line.endswith("!")
+            or normalized.startswith("[ ]")
         ):
             continue
 
@@ -100,6 +102,8 @@ def _strip_metadata(line: str) -> str:
     for prefix in ("todo:", "action:"):
         if result.lower().startswith(prefix):
             result = result[len(prefix) :].strip()
+    if result.startswith("[ ]"):
+        result = result[3:].strip()
     if result.endswith("!"):
         result = result[:-1].rstrip()
     for pattern in PRIORITY_PATTERNS.values():

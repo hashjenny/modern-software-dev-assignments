@@ -1,8 +1,6 @@
 import re
 from dataclasses import dataclass
 
-from backend.app.models import ActionItem
-
 
 @dataclass
 class ExtractionResult:
@@ -10,7 +8,7 @@ class ExtractionResult:
     action_items: list[str]
 
 
-def extract_action_items(text: str) -> list[ActionItem]:
+def extract_action_items(text: str) -> list[str]:
     """Extract action items from text.
 
     Parses lines that:
@@ -20,11 +18,7 @@ def extract_action_items(text: str) -> list[ActionItem]:
     Each line has "- " prefix stripped before processing.
     """
     lines = [line.strip("- ") for line in text.splitlines() if line.strip()]
-    action_items = []
-    for line in lines:
-        if line.endswith("!") or line.lower().startswith("todo:"):
-            action_items.append(ActionItem(description=line))
-    return action_items
+    return [line for line in lines if line.endswith("!") or line.lower().startswith("todo:")]
 
 
 def extract_content(text: str) -> ExtractionResult:

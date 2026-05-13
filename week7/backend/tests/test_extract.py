@@ -54,6 +54,27 @@ def test_extract_assignee():
     assert items["Update"] == "carol"
 
 
+def test_checkbox_format():
+    text = """
+    - [ ] write release notes
+    - [ ] call customer by 2026-07-01 @alice
+    """.strip()
+    items = extract_action_items(text)
+    assert len(items) == 2
+    assert items[0].description == "write release notes"
+    assert items[1].description == "call customer"
+    assert items[1].due_date == "2026-07-01"
+    assert items[1].assignee == "alice"
+
+
+def test_date_mention_not_treated_as_assignee():
+    text = "TODO: Submit report @2026-06-30"
+    items = extract_action_items(text)
+    assert len(items) == 1
+    assert items[0].due_date == "2026-06-30"
+    assert items[0].assignee is None
+
+
 def test_strip_metadata_from_description():
     """Metadata markers should not appear in the plain description."""
     text = "TODO: P1 critical Fix login bug @alice due: 2026-06-01!"

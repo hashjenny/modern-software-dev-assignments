@@ -1,5 +1,5 @@
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Table, Text
-from sqlalchemy.orm import Mapped, declarative_base, mapped_column, relationship
+from sqlalchemy.orm import declarative_base, relationship
 
 Base = declarative_base()
 
@@ -33,6 +33,6 @@ class Tag(Base):
 class ActionItem(Base):
     __tablename__ = "action_items"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
-    description: Mapped[str] = mapped_column(Text, nullable=False)
-    completed: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, index=True)
+    id = Column(Integer, primary_key=True, index=True)
+    description = Column(Text, nullable=False)
+    completed = Column(Boolean, default=False, nullable=False, index=True)
